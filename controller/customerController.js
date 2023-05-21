@@ -15,8 +15,6 @@ const addCustomer = async (req, res, next) => {
       message: error.message,
     });
   }
-
-  next();
 };
 
 const getAllCustomers = async (req, res, next) => {
@@ -25,11 +23,11 @@ const getAllCustomers = async (req, res, next) => {
     const name = req.query.name;
     const phone = req.query.phone;
     const nameExpression = new RegExp(name);
-    const phoneExpression = new RegExp(`${phone}`)
+    const phoneExpression = new RegExp(`${phone}`);
 
     let customers = await Customer.find({
       name: { $regex: nameExpression, $options: "i" },
-      phone: {$regex: phoneExpression, }
+      phone: { $regex: phoneExpression },
     })
       .limit(limit)
       .sort({ name: -1 });
@@ -105,8 +103,6 @@ const deleteCustomer = async (req, res, next) => {
     });
   }
 };
-
-
 
 module.exports = {
   getAllCustomers,
