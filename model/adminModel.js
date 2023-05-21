@@ -1,14 +1,24 @@
 const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
 
 const adminSchema = mongoose.Schema({
   name: { type: String, required: true },
   //   userName:{type:String, }
   phone: [{ type: String, required: true, unique: true }],
+  password: { type: String, required: true },
   createdAt: { type: Date, default: Date.now() },
+  username: { type: String },
 });
 
 adminSchema.pre("save", function (next) {
-  this.slug = this.name.toLocaleLowerCase().replace(" ", ".");
+  this.username = this.name.toLocaleLowerCase().replace(" ", ".");
+  next();
+});
+
+adminSchema.pre("save", function (next) {
+  const salt = bcrypt.genSaltSync(10);
+  const hashedPassword = bcrypt.hashSync(this.password, salt);
+  this.password = hashedPassword;
   next();
 });
 

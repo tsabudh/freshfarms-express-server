@@ -12,6 +12,7 @@ const {
 } = require("./controller/customerController");
 
 const{ createAdmin} = require("./controller/adminController");
+const {validateAccount} = require("./controller/authController");
 
 const Customer = require("./model/customerModel");
 const Product = require("./model/productModel");
@@ -32,9 +33,13 @@ app
 app.route("/admins").post(createAdmin);
 
 
+app.route("/login").post(validateAccount);
+
+
+
 app.use("/", (req, res, next) => {
   res.send("Welcome to Shree Krishna Dairy's API");
-  next();
+  
 });
 
 module.exports = app;
