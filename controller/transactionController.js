@@ -19,9 +19,18 @@ const createTransaction = async (req, res, next) => {
   }
 };
 
+const editTransaction = (req, res, next)=>{
+
+    next();
+}
+
 const getAllTransactions = async (req, res, next) => {
   try {
+    const limit = req.query.limit;
+    const product = req.query.product;
+
     const results = await Transaction.find();
+
     res.send({
       status: "success",
       data: results,
@@ -34,4 +43,4 @@ const getAllTransactions = async (req, res, next) => {
   }
 };
 
-module.exports = { createTransaction, getAllTransactions };
+module.exports = { createTransaction,editTransaction, getAllTransactions };

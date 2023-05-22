@@ -21,7 +21,12 @@ const {
 
 const Customer = require("./model/customerModel");
 const Product = require("./model/productModel");
-const { addProduct } = require("./controller/productController");
+const {
+  addProduct,
+  updateManyProducts,
+  getProduct,
+  updateProduct,
+} = require("./controller/productController");
 const {
   createTransaction,
   getAllTransactions,
@@ -45,7 +50,15 @@ app.route("/admins").post(createAdmin);
 app.route("/login").post(validateAccount, loginAccount);
 app.use("/logout", logoutAccount);
 
-app.route("/products").post(checkClearance, addProduct);
+app
+  .route("/products")
+  .post(checkClearance, addProduct)
+  .patch(checkClearance, updateManyProducts);
+
+app
+  .route("/products/:id")
+  .get(checkClearance, getProduct)
+  .patch(checkClearance, updateProduct);
 
 app
   .route("/transactions")

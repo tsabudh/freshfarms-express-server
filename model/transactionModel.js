@@ -17,22 +17,34 @@ const transactionSchema = new mongoose.Schema({
 });
 
 transactionSchema.pre("save", async function (next) {
-  try {
-    if (this.productId) {
-      let priceThen = await Product.findById(this.productId).price;
-      this.priceThen = priceThen;
-    } else if (this.productName) {
-      const product = await Product.findOne({
-        name: this.productName,
-      });
-      this.productName = product.name;
-      this.productId = product._id;
-    } else throw new Error();
-  } catch (error) {
-    console.log(error);
-  }
+  if (this.productId) {
+    console.log("found product id");
+    let product = await Product.findById(this.productId);
+    this.productName = product.name;
+    this.priceThen = product.price;
+    next();
+  } else if (this.productName) {
+    console.log("found product name");
+    const products = new Set([
+      "Cow Milk",
+      "Buffalo Milk",
+      "Mixed Milk",
+      "Paneer",
+      "Kurauni",
+      "Yogurt",
+    ]);
+    if (!products.has(this.productName)) {
+      throw new Error(`Product named '${this.productName}' not found.`);
+    }
 
-  next();
+    const product = await Product.findOne({
+      name: this.productName,
+    });
+    this.productId = product._id;
+    this.productName = product.name;
+    this.priceThen = product.price;
+    next();
+  } else throw new Error("provide product name or id");
 });
 
 const Transaction = mongoose.model("Transaction", transactionSchema);
