@@ -3,48 +3,46 @@ const Product = require("../model/productModel");
 
 const transactionSchema = new mongoose.Schema({
   issuedTime: { type: Date, default: Date.now(), immutable: true },
-  priceThen: {
-    type: Number,
-  },
-  productName: {
-    type: String,
-  },
-  productId: {
-    type: mongoose.Types.ObjectId,
-    ref: "Product",
-  },
-  quantity: { type: Number, default: 1 },
+  items: [
+    {
+      priceThen: {
+        type: Number,
+      },
+      productName: {
+        type: String,
+      },
+      productId: {
+        type: mongoose.Types.ObjectId,
+        ref: "Product",
+      },
+      quantity: { type: Number, default: 1 },
+    },
+  ],
 });
 
 transactionSchema.pre("save", async function (next) {
-  if (this.productId) {
-    console.log("found product id");
-    let product = await Product.findById(this.productId);
-    this.productName = product.name;
-    this.priceThen = product.price;
-    next();
-  } else if (this.productName) {
-    console.log("found product name");
-    const products = new Set([
-      "Cow Milk",
-      "Buffalo Milk",
-      "Mixed Milk",
-      "Paneer",
-      "Kurauni",
-      "Yogurt",
-    ]);
-    if (!products.has(this.productName)) {
-      throw new Error(`Product named '${this.productName}' not found.`);
-    }
+  let products = await Product.find().select("name _id price");
+  console.log(products);
+  this.items.forEach((item) => {
+    if (item.productId) {
+      let product1 = products.find((product) => product._id.toString() == item.productId);
+      if (!product1)
+        throw new Error(`Product with id "${item.productId}" not found.`);
 
-    const product = await Product.findOne({
-      name: this.productName,
-    });
-    this.productId = product._id;
-    this.productName = product.name;
-    this.priceThen = product.price;
-    next();
-  } else throw new Error("provide product name or id");
+      // let product1 = await Product.findById(item.productId);
+      item.productName = product1.name;
+      item.priceThen = product1.price;
+    } else if (item.productName) {
+      let product2 = products.find(
+        (product) => product.name == item.productName.trim().toLocaleLowerCase()
+      );
+      if (!product2)
+        throw new Error(`Product with name "${item.productName}" not found.`);
+      item.productId = product2._id;
+      item.productName = product2.name;
+      item.priceThen = product2.price;
+    } else throw new Error("provide product name or id");
+  });
 });
 
 const Transaction = mongoose.model("Transaction", transactionSchema);

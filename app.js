@@ -2,6 +2,7 @@ const express = require("express");
 const fs = require("fs");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
+const cors = require("cors");
 
 const {
   addCustomer,
@@ -33,6 +34,7 @@ const {
 } = require("./controller/transactionController");
 
 const app = express();
+app.use(cors());
 app.use(bodyParser.json());
 
 const customers = JSON.parse(fs.readFileSync("./customer.json", "UTF-8"));

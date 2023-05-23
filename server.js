@@ -15,3 +15,4 @@ async function connectDatabase() {
   console.log("Connected to Database");
 }
 connectDatabase();
+    // cd "C:/Program Files/MongoDB/Server/6.0/bin"
