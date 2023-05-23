@@ -6,8 +6,10 @@ const transactionSchema = new mongoose.Schema(
   {
     issuedTime: { type: Date, default: Date.now(), immutable: true },
     customer: {
-      id: { type: mongoose.Types.ObjectId, ref: "Customer", default: null },
-      name: { type: String, default: "Unregistered Customer" },
+      type: {
+        customerId: { type: mongoose.Types.ObjectId, ref: "Customer" },
+        name: { type: String, default: "Unknown Customer" },
+      },
     },
     items: [
       {
@@ -26,15 +28,34 @@ const transactionSchema = new mongoose.Schema(
     ],
   },
   {
+    toObject: {
+      virtuals: true,
+    },
     toJSON: {
       virtuals: true,
     },
   }
 );
 
+//* virtuals
+
+transactionSchema.virtual("cost").get(function () {
+  let totalCost = 0;
+  // console.log(this);
+  this.items.forEach((item) => {
+    totalCost += item.priceThen;
+  });
+  return totalCost;
+});
+
+//* customer object validation
+transactionSchema.path("customer").validate(function (value) {
+  if (this.customer.customerId || this.customer.name) return true;
+});
+
+//* reference attachment of product with price at that date
 transactionSchema.pre("save", async function (next) {
   let products = await Product.find().select("name _id price");
-  console.log(products);
   this.items.forEach((item) => {
     if (item.productId) {
       let product1 = products.find(
@@ -60,12 +81,13 @@ transactionSchema.pre("save", async function (next) {
   next();
 });
 
-
-transactionSchema.pre('save', async function(next){
-  if(this.customer.id){
-    this.customer.name = await Customer.findById(this.customer.id).name;
+//* assigning customer name from given customer reference _id
+transactionSchema.pre("save", async function (next) {
+  if (this.customer.customerId) {
+    let customer = await Customer.findById(this.customer.customerId);
+    this.customer.name = customer.name;
   }
-})
+});
 
 const Transaction = mongoose.model("Transaction", transactionSchema);
 

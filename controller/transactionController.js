@@ -29,8 +29,7 @@ const getAllTransactions = async (req, res, next) => {
     const limit = req.query.limit;
     const product = req.query.product;
 
-    const results = await Transaction.find();
-
+    const results = await Transaction.find().select('+cost');
     res.send({
       status: "success",
       data: results,
