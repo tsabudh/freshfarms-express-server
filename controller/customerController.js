@@ -25,12 +25,11 @@ const getAllCustomers = async (req, res, next) => {
     const nameExpression = new RegExp(name);
     const phoneExpression = new RegExp(`${phone}`);
 
-    let customers = await Customer.find({
-      name: { $regex: nameExpression, $options: "i" },
-      phone: { $regex: phoneExpression },
-    })
-      .limit(limit)
-      .sort({ name: -1 });
+    let filter = {};
+    if (name) filter.name = { $regex: nameExpression, $options: "i" };
+    if (name) filter.phone = { $regex: phoneExpression };
+
+    let customers = await Customer.find().limit(limit).sort({ name: 1 });
     res.send({
       status: "success",
       data: customers,

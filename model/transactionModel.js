@@ -8,7 +8,13 @@ const transactionSchema = new mongoose.Schema(
     customer: {
       type: {
         customerId: { type: mongoose.Types.ObjectId, ref: "Customer" },
-        name: { type: String, default: "Unknown Customer" },
+        name: {
+          type: String,
+          default: "Unknown Customer",
+          lowercase: true,
+          trim: true,
+          maxLength: 50,
+        },
       },
     },
     items: [
