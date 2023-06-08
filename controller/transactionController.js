@@ -105,12 +105,12 @@ const getAllTransactions = async (req, res, next) => {
           },
         });
 
-      filterParams.dateRange &&
+      filterParams.issuedTime &&
         aggregationPipeline.push({
           $match: {
             issuedTime: {
-              $gte: new Date(filterParams.dateRange.from),
-              $lte: new Date(filterParams.dateRange.to),
+              $gte: new Date(filterParams.issuedTime.from),
+              $lte: new Date(filterParams.issuedTime.to),
             },
           },
         });
@@ -158,7 +158,16 @@ const getAllTransactions = async (req, res, next) => {
           });
         }
       }
+      filterParams.customerId &&
+        aggregationPipeline.push({
+          $match: {
+            "customer.customerId": {
+              $eq: new mongoose.Types.ObjectId(filterParams.customerId),
+            },
+          },
+        });
     }
+
     const mongooseQuery = Transaction.aggregate([...aggregationPipeline]);
 
     const results = await mongooseQuery;
