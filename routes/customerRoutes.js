@@ -7,7 +7,7 @@ const authController = require("../controller/authController");
 
 router
   .route("/")
-  .get(authController.checkClearance, getAllCustomers)
+  .get(authController.checkClearance, customerController.getAllCustomers)
   .post(authController.checkClearance, customerController.addCustomer);
 
 router

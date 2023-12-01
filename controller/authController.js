@@ -15,6 +15,7 @@ const validateAccount = async function (req, res, next) {
       console.log(res.locals);
       next();
     } else {
+      throw new Error("Account not found. Incorrect password or username");
       console.log("account not found/ password incorrect");
     }
   } catch (error) {
@@ -75,4 +76,9 @@ const logoutAccount = (req, res, next) => {
     token: "Invalid Token",
   });
 };
-module.exports = { validateAccount, loginAccount, checkClearance, logoutAccount };
+module.exports = {
+  validateAccount,
+  loginAccount,
+  checkClearance,
+  logoutAccount,
+};

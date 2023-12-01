@@ -4,12 +4,11 @@
     "cors": "^2.8.5",
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.0",
-    "mongoose": "^7.2.0"
+    "mongoose": "^7.2.0",
+    "redis": "^4.6.11"
   },
   "scripts": {
-    "db": "npm run c && npm run db-dir && npm run mongo",
-    "c": "c:",
-    "db-dir": "cd \"C:/Program Files/MongoDB/Server/6.0/bin\" ",
-    "mongo": "mongod.exe"
+    "start": "nodemon server.js"
+    
   }
 }

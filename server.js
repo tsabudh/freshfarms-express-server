@@ -1,18 +1,27 @@
 const mongoose = require("mongoose");
 const app = require("./app");
-const mongoDB = "mongodb://localhost:27017";
+const redis = require("redis");
 
-const server = app.listen(3000);
-
-console.log("server started");
+const mongoDB = "mongodb://127.0.0.1:27017/shree-krishna";
+const redisURL = "redis://127.0.0.1:6379";
 
 async function connectDatabase() {
   try {
     await mongoose.connect(mongoDB);
+    console.log("Connected to Database.");
+
+    // Connect to Redis cache
+    const client = redis.createClient(redisURL);
+    await client.connect();
+
+    // await client.flushAll();
+
+    console.log("Connected to Redis.");
   } catch (error) {
     console.log("Mongoose Database Error");
+    console.log(error);
   }
-  console.log("Connected to Database");
 }
+
+const server = app.listen(3000);
 connectDatabase();
-    // cd "C:/Program Files/MongoDB/Server/6.0/bin"

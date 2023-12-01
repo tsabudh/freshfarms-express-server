@@ -1,10 +1,10 @@
 const Admin = require("../model/adminModel");
 
 const createAdmin = async (req, res, next) => {
-  let adminDetails = req.body;
-  console.log(adminDetails);
 
+  
   try {
+    let adminDetails = req.body;
     let newAdmin = new Admin(adminDetails);
 
     console.log("hello");

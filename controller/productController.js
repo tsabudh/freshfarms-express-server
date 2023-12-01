@@ -3,7 +3,6 @@ const Product = require("../model/productModel");
 
 const addProduct = async (req, res, next) => {
   try {
-    const produceDetails = req.body;
     let newProduct = new Product(req.body);
     newProduct = await newProduct.save();
     res.send({
@@ -51,7 +50,7 @@ const getProduct = async (req, res, next) => {
 
     const query = Product.findById(productId);
     const product = await query;
-
+    if (!product) throw new Error("Product not found with that ID");
     res.send({
       status: "success",
       data: product,
