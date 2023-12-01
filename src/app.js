@@ -4,29 +4,30 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 
-const transactionRouter = require("./routes/transactionRoutes");
-const productRouter = require("./routes/productRoutes");
-const customerRouter = require("./routes/customerRoutes");
-const redisRouter = require("./routes/redisRoute");
-
-const { createAdmin } = require("./controller/adminController");
+const {
+  transactionRouter,
+  productRouter,
+  customerRouter,
+  redisRouter,
+  adminRouter,
+} = require("./routes/");
 
 const {
   validateAccount,
   loginAccount,
   checkClearance,
   logoutAccount,
-} = require("./controller/authController");
+} = require("./controllers/authController");
+const { authController } = require("./controllers");
 
 const app = express();
 
 app.use(cors());
 app.use(bodyParser.json());
 
-app.route("/api/v1/admins").post(createAdmin);
+app.use("/api/v1/admins", adminRouter);
 
-app.route("/api/v1/login").post(validateAccount, loginAccount);
-app.use("/api/v1/logout", logoutAccount);
+app.use(authController.checkClearance);
 
 app.use("/api/v1/products", productRouter);
 app.use("/api/v1/transactions", transactionRouter);

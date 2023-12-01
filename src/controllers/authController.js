@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-const Admin = require("../model/adminModel");
+const { Admin } = require("../models/");
 
 const validateAccount = async function (req, res, next) {
   try {

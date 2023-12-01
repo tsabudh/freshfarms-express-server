@@ -1,10 +1,7 @@
-const express = require("express");
 const redis = require("redis");
 const mongoose = require("mongoose");
 
-const { client } = require("../server");
-let app = require("../app");
-const Transaction = require("../model/transactionModel");
+const { Transaction } = require("../models");
 
 const exec = mongoose.Query.prototype.exec;
 

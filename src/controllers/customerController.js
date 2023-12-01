@@ -1,6 +1,5 @@
-const mongoose = require("mongoose");
 
-const Customer = require("./../model/customerModel");
+const {Customer} = require("./../models/");
 
 const addCustomer = async (req, res, next) => {
   try {

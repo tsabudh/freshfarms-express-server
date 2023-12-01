@@ -1,10 +1,11 @@
 const mongoose = require("mongoose");
-const Product = require("../model/productModel");
-const Customer = require("../model/customerModel");
+const Product = require("./Product");
+const Customer = require("./Customer");
 
 const transactionSchema = new mongoose.Schema(
   {
     issuedTime: { type: Date, default: Date.now(), immutable: true },
+    
     customer: {
       type: {
         customerId: { type: mongoose.Types.ObjectId, ref: "Customer" },

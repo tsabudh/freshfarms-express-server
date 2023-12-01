@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const Transaction = require("../model/transactionModel");
+const {Transaction} = require("../models/");
 
 const createTransaction = async (req, res, next) => {
   try {

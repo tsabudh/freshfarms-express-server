@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
-const app = require("./app");
 const redis = require("redis");
+
+const app = require("./src/app");
 
 const mongoDB = "mongodb://127.0.0.1:27017/shree-krishna";
 const redisURL = "redis://127.0.0.1:6379";
