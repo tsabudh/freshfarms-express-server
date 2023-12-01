@@ -1,6 +1,6 @@
 
 # Shree Krishna Dairy Server
-It is a project built for a local dairy shop to digitally maintain and record the shop's transcations and inventory.
+It is a project built for a local dairy shop to digitally maintain and record the shop's transactions and inventory.
 
 ## Installation
 
