@@ -1,59 +1,58 @@
 const redis = require("redis");
 const mongoose = require("mongoose");
 
-const { Transaction } = require("../models");
+const client = redis.createClient();
+client.connect();
 
 const exec = mongoose.Query.prototype.exec;
 
+mongoose.Query.prototype.cache = function (options = {}) {
+  this.useCache = true;
+  this.hashKey = JSON.stringify(options.key || "default");
+
+  return this;
+};
+
 mongoose.Query.prototype.exec = async function () {
-  // Check if query is cached
-  const client = redis.createClient();
-  client.connect();
-
-  const key = JSON.stringify(
-    Object.assign({}, this.getQuery(), {
-      collection: this.mongooseCollection.name,
-    })
-  );
-
-  const cachedResult = await client.get(key);
-
-  // If cached, return the results
-  if (cachedResult) {
-    console.log("CACHE HIT");
-
-    const doc = JSON.parse(cachedResult);
-
-    Array.isArray(doc) ? doc.map((d) => new this.model(d)) : doc;
-
-    return doc;
+  if (!this.useCache) {
+    return exec.apply(this, arguments);
   }
 
-  // Otherwise hit mongodb and cache results
-
-  const results = await exec.apply(this, arguments);
-
-  client.set(key, JSON.stringify(results));
-
-  return results;
-};
-
-exports.testCache = async function (req, res) {
   try {
-    let customerId = "64678ca1aacc08d81728332a";
+    const key = JSON.stringify(
+      Object.assign({}, this.getQuery(), {
+        collection: this.mongooseCollection.name,
+      })
+    );
 
-    const transactions = await Transaction.find({
-      "customer.customerId": customerId,
-    });
+    const cachedResult = JSON.parse(await client.hGet(this.hashKey, key));
 
-    res.status(200).json({
-      status: "success",
-      data: transactions,
-    });
-  } catch (error) {
-    console.log(error);
-    res.json({
-      status: "failure",
-    });
+    // If cached, return the results
+    if (cachedResult) {
+      console.log("CACHE HIT");
+
+      // const doc = JSON.parse(cachedResult);
+      const doc = cachedResult;
+
+      Array.isArray(doc) ? doc.map((d) => new this.model(d)) : doc;
+
+      return doc;
+    }
+
+    // Otherwise hit mongodb and cache results
+
+    const results = await exec.apply(this, arguments);
+
+    client.hSet(this.hashKey, key, JSON.stringify(results));
+
+    return results;
+  } catch (err) {
+    console.log(err.stack);
   }
 };
+
+const clearHash = async function (hashKey = "default") {
+  await client.del(JSON.stringify(hashKey));
+};
+
+module.exports = { clearHash };
