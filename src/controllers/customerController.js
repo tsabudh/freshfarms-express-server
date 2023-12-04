@@ -28,7 +28,7 @@ const getAllCustomers = async (req, res, next) => {
     if (name) filter.name = { $regex: nameExpression, $options: "i" };
     if (name) filter.phone = { $regex: phoneExpression };
 
-    let customers = await Customer.find().limit(limit).sort({ name: 1 });
+    let customers = await Customer.find().cache().limit(limit).sort({ name: 1 });
     res.send({
       status: "success",
       data: customers,
