@@ -1,8 +1,9 @@
-const express = require("express");
-const fs = require("fs");
-const mongoose = require("mongoose");
-const bodyParser = require("body-parser");
-const cors = require("cors");
+import { Request, Response, NextFunction } from "express";
+
+import express from "express";
+
+import bodyParser from "body-parser";
+import cors from "cors";
 
 const {
   transactionRouter,
@@ -10,15 +11,9 @@ const {
   customerRouter,
   redisRouter,
   adminRouter,
-} = require("./routes/");
+} = require("./routes/index.js");
 
-const {
-  validateAccount,
-  loginAccount,
-  checkClearance,
-  logoutAccount,
-} = require("./controllers/authController");
-const { authController } = require("./controllers");
+const { authController } = require("./controllers/index.js");
 
 const app = express();
 
@@ -35,7 +30,7 @@ app.use("/api/v1/customers", customerRouter);
 
 app.use("/api/v1/redis", redisRouter);
 
-app.all("*", (req, res, next) => {
+app.all("*", (req: Request, res: Response, next: NextFunction) => {
   res.json({
     status: "failure",
     message: "Missed the route.",
@@ -43,3 +38,4 @@ app.all("*", (req, res, next) => {
 });
 
 module.exports = app;
+// export {}
