@@ -1,8 +1,13 @@
-const mongoose = require("mongoose");
+import mongoose, { PipelineStage } from "mongoose";
+import express from "express";
 
-const {Transaction} = require("../models/");
+import Transaction from "../models/Transaction";
 
-const createTransaction = async (req, res, next) => {
+export const createTransaction = async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
   try {
     const transactionDetails = req.body;
     const newTransaction = await Transaction.create(transactionDetails);
@@ -11,7 +16,7 @@ const createTransaction = async (req, res, next) => {
       status: "success",
       data: newTransaction,
     });
-  } catch (error) {
+  } catch (error: any) {
     res.send({
       status: "failure",
       message: error.message,
@@ -19,15 +24,23 @@ const createTransaction = async (req, res, next) => {
   }
 };
 
-const editTransaction = (req, res, next) => {
+export const editTransaction = (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
   next();
 };
 
-const getAllTransactions = async (req, res, next) => {
+export const getAllTransactions = async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
   try {
     const limit = req.query.limit;
 
-    const aggregationPipeline = [
+    const aggregationPipeline:PipelineStage[] = [
       {
         $addFields: {
           totalQuantity: {
@@ -55,12 +68,49 @@ const getAllTransactions = async (req, res, next) => {
       },
     ];
 
+    interface filterParams {
+      itemsVariety?: {
+        from: String;
+        to: String;
+      };
+
+      totalQuantity?: {
+        from: String;
+        to: String;
+      };
+
+      transactionAmountRange?: {
+        from: String;
+        to: String;
+      };
+      issuedTime?: {
+        from: Date;
+        to: Date;
+      };
+
+      priceRange?: {
+        from: String;
+        to: String;
+      };
+      productArray: Array<string>;
+      customerArray: Array<string>;
+
+      sortBy: {
+        issuedTime?:any,
+        customer?:any,
+        totalQuantity?:any,
+        itemsVariety?:any
+      };
+      customerId?: string;
+    }
+
     if (req.query.filter) {
-      let filterParams = atob(req.query.filter);
+      let filterParamsX = atob(req.query.filter as string);
       console.log(req.query.filter);
-      filterParams = JSON.parse(filterParams);
+      let filterParams: filterParams = JSON.parse(filterParamsX);
+
       console.log(req.query.filter);
-      console.log(filterParams);
+      console.log("zizizizi", typeof filterParams);
 
       // let minN = `items.${filterParams?.totalQuantity?.from}`;
       // let maxN = `items.${filterParams?.totalQuantity?.to}`;
@@ -75,7 +125,7 @@ const getAllTransactions = async (req, res, next) => {
       //     },
       //   });
 
-      filterParams.itemsVariety &&
+      filterParams?.itemsVariety &&
         aggregationPipeline.push({
           $match: {
             itemsVariety: {
@@ -141,7 +191,7 @@ const getAllTransactions = async (req, res, next) => {
       console.log("message");
       // console.log(filterParams.sort.byDate);
       if (filterParams.sortBy) {
-        let sortBy = {};
+        let sortBy:filterParams['sortBy'] = {};
 
         if (filterParams.sortBy.issuedTime)
           sortBy.issuedTime = filterParams.sortBy.issuedTime;
@@ -176,7 +226,7 @@ const getAllTransactions = async (req, res, next) => {
       numberOfResults: results.length,
       data: results,
     });
-  } catch (error) {
+  } catch (error:any) {
     console.log(error);
     console.log(error.message);
     res.send({

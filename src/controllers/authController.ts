@@ -1,10 +1,16 @@
-const mongoose = require("mongoose");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
+import mongoose from "mongoose";
 
-const { Admin } = require("../models/");
+import express from "express";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
-const validateAccount = async function (req, res, next) {
+import Admin from "../models/Admin";
+
+export const validateAccount = async function (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) {
   try {
     const { username, password } = req.body;
     const admin = await Admin.findOne({ username: username });
@@ -15,10 +21,10 @@ const validateAccount = async function (req, res, next) {
       console.log(res.locals);
       next();
     } else {
-      throw new Error("Account not found. Incorrect password or username");
       console.log("account not found/ password incorrect");
+      throw new Error("Account not found. Incorrect password or username");
     }
-  } catch (error) {
+  } catch (error: any) {
     console.log(error);
     res.send({
       status: "failure",
@@ -27,7 +33,11 @@ const validateAccount = async function (req, res, next) {
   }
 };
 
-const loginAccount = (req, res, next) => {
+export const loginAccount = (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
   const payload = {
     currentUser: res.locals.currentUser,
     issuedAt: Date.now(),
@@ -45,7 +55,11 @@ const loginAccount = (req, res, next) => {
   });
 };
 
-const checkClearance = (req, res, next) => {
+export const checkClearance = (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
   const bearerHeader = req.headers.authorization;
 
   if (bearerHeader) {
@@ -70,15 +84,19 @@ const checkClearance = (req, res, next) => {
   }
 };
 
-const logoutAccount = (req, res, next) => {
+export const logoutAccount = (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
   res.send({
     status: "success",
     token: "Invalid Token",
   });
 };
-module.exports = {
-  validateAccount,
-  loginAccount,
-  checkClearance,
-  logoutAccount,
-};
+// module.exports = {
+//   validateAccount,
+//   loginAccount,
+//   checkClearance,
+//   logoutAccount,
+// };
