@@ -1,5 +1,7 @@
-const express = require("express");
-const cleanCache = require("../middlewares/cleanCache");
+
+import express from 'express';
+
+const cleanCache = require("../middlewares/cleanCache.js");
 const router = express.Router();
 
 const { customerController, authController } = require("../controllers/");
@@ -23,4 +25,4 @@ router
     customerController.deleteCustomer
   );
 
-module.exports = router;
+export default router;

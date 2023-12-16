@@ -1,6 +1,6 @@
-const express = require("express");
+import express from 'express';
 
-const {productController, authController} = require("../controllers/");
+import {productController, authController} from "../controllers/";
 
 const router = express.Router();
 
@@ -14,4 +14,4 @@ router
   .get(authController.checkClearance, productController.getProduct)
   .patch(authController.checkClearance, productController.updateProduct);
 
-module.exports = router;
+export default router;

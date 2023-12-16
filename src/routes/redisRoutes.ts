@@ -1,4 +1,4 @@
-const express = require("express");
+import express from 'express';
 
 const redisCache = require("../utils/redisCache");
 
@@ -6,4 +6,4 @@ const router = express.Router();
 
 // router.route("/").get(redisCache.testCache);
 
-module.exports = router;
+export default router;

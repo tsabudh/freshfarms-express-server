@@ -1,7 +1,7 @@
-const express = require("express");
+import express from 'express';
 
-const { transactionController, authController } = require("../controllers/");
-
+import * as authController from "../controllers/authController";
+import * as transactionController from "../controllers/transactionController"
 const router = express.Router();
 
 // Routes
@@ -10,4 +10,4 @@ router
   .get(transactionController.getAllTransactions)
   .post(authController.checkClearance, transactionController.createTransaction);
 
-module.exports = router;
+export default  router;
