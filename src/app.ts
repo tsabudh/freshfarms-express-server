@@ -5,13 +5,12 @@ import express from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
 
-const {
-  transactionRouter,
-  productRouter,
-  customerRouter,
-  redisRouter,
-  adminRouter,
-} = require("./routes/index.js");
+import   transactionRouter from "./routes/transactionRoutes";
+import   adminRouter from "./routes/adminRoutes";
+import   productRouter from "./routes/productRoutes";
+import   customerRouter from "./routes/customerRoutes";
+import   redisRouter from "./routes/redisRoutes";
+  
 
 const { authController } = require("./controllers/index.js");
 
@@ -37,5 +36,5 @@ app.all("*", (req: Request, res: Response, next: NextFunction) => {
   });
 });
 
-module.exports = app;
+export default app;
 // export {}

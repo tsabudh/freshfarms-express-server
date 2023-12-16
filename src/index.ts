@@ -1,18 +1,19 @@
-const mongoose = require("mongoose");
-const redis = require("redis");
+import mongoose = require("mongoose");
+import redis = require("redis");
 
-const app = require("./app.ts");
+import app from "./app";
 
-const mongoDB = "mongodb://127.0.0.1:27017/shree-krishna";
-const redisURL = "redis://127.0.0.1:6379";
+const mongoDB: string = "mongodb://127.0.0.1:27017/shree-krishna";
+const redisURL: string = "redis://127.0.0.1:6379";
 
+mongoose.Promise = Promise;
 async function connectDatabase() {
   try {
     await mongoose.connect(mongoDB);
     console.log("Connected to Database.");
 
     // Connect to Redis cache
-    const client = redis.createClient(redisURL);
+    const client = redis.createClient({ url: redisURL });
     await client.connect();
 
     // await client.flushAll();
@@ -24,5 +25,6 @@ async function connectDatabase() {
   }
 }
 
-const server = app.listen(3000);
+
+app.listen(3000);
 connectDatabase();
