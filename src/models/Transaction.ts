@@ -3,20 +3,20 @@ import mongoose from "mongoose";
 import Product from "./Product";
 import Customer from "./Customer";
 
-interface ITransaction{
-  issuedTime:Date,
-  customer:{
-    customerId?:mongoose.Types.ObjectId,
-    name?:string,
-
-  },
-  items:Array<{
-    priceThen:number,
-    productName:string,
-    productId:string,
+interface ITransaction {
+  issuedTime: Date;
+  customer: {
+    customerId?: mongoose.Types.ObjectId;
+    name?: string;
+  };
+  items: Array<{
+    priceThen: number;
+    productName: string;
+    productId: string;
     // productId:mongoose.Types.ObjectId,
-    quantity:number
-}>
+    quantity: number;
+  }>;
+  cost: number;
 }
 const transactionSchema = new mongoose.Schema<ITransaction>(
   {
@@ -79,9 +79,8 @@ transactionSchema.path("customer").validate(function (value) {
 
 //* reference attachment of product with price at that date
 transactionSchema.pre("save", async function (next) {
-
   let products = await Product.find().select("name _id price");
-  
+
   this.items.forEach((item) => {
     if (item.productId) {
       let product1 = products.find(
@@ -93,9 +92,8 @@ transactionSchema.pre("save", async function (next) {
       // let product1 = await Product.findById(item.productId);
       item.productName = product1.name;
       item.priceThen = product1.price;
-
     } else if (item.productName) {
-      let product2  = products.find((product) => {
+      let product2 = products.find((product) => {
         if (item.productName && product.name == item.productName)
           return item.productName.trim().toLocaleLowerCase();
       });
@@ -116,10 +114,25 @@ transactionSchema.pre("save", async function (next) {
     let customer = await Customer.findById(this.customer.customerId);
     if (customer) {
       this.customer.name = customer.name;
+    } else {
+      next(new Error("Customer not found with that ID"));
     }
   }
 });
 
-const Transaction = mongoose.model<ITransaction>("Transaction", transactionSchema);
+transactionSchema.post("save", async function (next) {
+  if (this.customer.customerId) {
+    let customer = await Customer.findById(this.customer.customerId);
+    if (customer) {
+      customer.trade.due += this.cost;
+      console.log("success");
+      await customer.save();
+    }
+  }
+});
+const Transaction = mongoose.model<ITransaction>(
+  "Transaction",
+  transactionSchema
+);
 
 export default Transaction;
