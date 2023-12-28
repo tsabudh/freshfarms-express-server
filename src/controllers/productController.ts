@@ -1,8 +1,11 @@
-const mongoose = require("mongoose");
+import mongoose from 'mongoose';
+import express from 'express';
+import Product from "../models/Product";
 
-const {Product} = require("../models/");
 
-const addProduct = async (req, res, next) => {
+export const addProduct = async (  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction) => {
   try {
     let newProduct = new Product(req.body);
     newProduct = await newProduct.save();
@@ -10,7 +13,7 @@ const addProduct = async (req, res, next) => {
       status: "success",
       data: newProduct,
     });
-  } catch (error) {
+  } catch (error:any) {
     res.send({
       status: "failure",
       message: error.message,
@@ -18,7 +21,9 @@ const addProduct = async (req, res, next) => {
   }
 };
 
-const updateManyProducts = async (req, res, next) => {
+export const updateManyProducts = async (  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction) => {
   try {
     const db = mongoose.connection.db;
 
@@ -37,7 +42,7 @@ const updateManyProducts = async (req, res, next) => {
       status: "success",
       data: results,
     });
-  } catch (error) {
+  } catch (error:any) {
     res.send({
       status: "failure",
       message: error.message,
@@ -45,7 +50,9 @@ const updateManyProducts = async (req, res, next) => {
   }
 };
 
-const getProduct = async (req, res, next) => {
+export const getProduct = async (  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction) => {
   try {
     const productId = req.params.id;
 
@@ -56,7 +63,7 @@ const getProduct = async (req, res, next) => {
       status: "success",
       data: product,
     });
-  } catch (error) {
+  } catch (error:any) {
     res.send({
       status: "failure",
       message: error.message,
@@ -64,7 +71,9 @@ const getProduct = async (req, res, next) => {
   }
 };
 
-const updateProduct = async (req, res, next) => {
+export const updateProduct = async (  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction) => {
   try {
     const productId = req.params.id;
     const updateDetails = req.body;
@@ -77,7 +86,7 @@ const updateProduct = async (req, res, next) => {
       status: "success",
       data: product,
     });
-  } catch (error) {
+  } catch (error:any) {
     res.send({
       status: "failure",
       message: error.message,
@@ -85,4 +94,4 @@ const updateProduct = async (req, res, next) => {
   }
 };
 
-module.exports = { addProduct, updateManyProducts, getProduct, updateProduct };
+

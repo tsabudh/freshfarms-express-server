@@ -40,7 +40,7 @@ export const getAllTransactions = async (
   try {
     const limit = req.query.limit;
 
-    const aggregationPipeline:PipelineStage[] = [
+    const aggregationPipeline: PipelineStage[] = [
       {
         $addFields: {
           totalQuantity: {
@@ -96,10 +96,10 @@ export const getAllTransactions = async (
       customerArray: Array<string>;
 
       sortBy: {
-        issuedTime?:any,
-        customer?:any,
-        totalQuantity?:any,
-        itemsVariety?:any
+        issuedTime?: any;
+        customer?: any;
+        totalQuantity?: any;
+        itemsVariety?: any;
       };
       customerId?: string;
     }
@@ -191,7 +191,7 @@ export const getAllTransactions = async (
       console.log("message");
       // console.log(filterParams.sort.byDate);
       if (filterParams.sortBy) {
-        let sortBy:filterParams['sortBy'] = {};
+        let sortBy: filterParams["sortBy"] = {};
 
         if (filterParams.sortBy.issuedTime)
           sortBy.issuedTime = filterParams.sortBy.issuedTime;
@@ -226,7 +226,7 @@ export const getAllTransactions = async (
       numberOfResults: results.length,
       data: results,
     });
-  } catch (error:any) {
+  } catch (error: any) {
     console.log(error);
     console.log(error.message);
     res.send({
@@ -236,4 +236,3 @@ export const getAllTransactions = async (
   }
 };
 
-module.exports = { createTransaction, editTransaction, getAllTransactions };

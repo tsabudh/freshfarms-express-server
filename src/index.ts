@@ -1,9 +1,17 @@
 import mongoose = require("mongoose");
 import redis = require("redis");
-
+import dotenv from "dotenv";
 import app from "./app";
+import path from "path";
 
-const mongoDB: string = "mongodb://127.0.0.1:27017/shree-krishna";
+dotenv.config({ path: path.join(__dirname) + "../../.env" });
+
+const mongoDB: string = (process.env.DATABASE_STRING as string).replace(
+  "<password>",
+  process.env.DATABASE_PASSWORD as string
+);
+// const mongoDB: string = "mongodb://127.0.0.1:27017/shree-krishna";
+
 const redisURL: string = "redis://127.0.0.1:6379";
 
 mongoose.Promise = Promise;
@@ -24,7 +32,6 @@ async function connectDatabase() {
     console.log(error);
   }
 }
-
 
 app.listen(3000);
 connectDatabase();

@@ -1,11 +1,13 @@
 
 import express from 'express';
 
-const cleanCache = require("../middlewares/cleanCache.js");
+import cleanCache from "../middlewares/cleanCache";
 const router = express.Router();
 
-const { customerController, authController } = require("../controllers/");
+import * as productController from "../controllers/productController";
 
+import * as customerController from "../controllers/customerController";
+import * as authController from "../controllers/authController";
 router
   .route("/")
   .get(authController.checkClearance, customerController.getAllCustomers)

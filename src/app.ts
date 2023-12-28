@@ -12,7 +12,7 @@ import   customerRouter from "./routes/customerRoutes";
 import   redisRouter from "./routes/redisRoutes";
   
 
-const { authController } = require("./controllers/index.js");
+import * as authController  from "./controllers/authController";
 
 const app = express();
 

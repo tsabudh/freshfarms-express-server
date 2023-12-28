@@ -3,7 +3,22 @@ import mongoose from "mongoose";
 import Product from "./Product";
 import Customer from "./Customer";
 
-const transactionSchema = new mongoose.Schema(
+interface ITransaction{
+  issuedTime:Date,
+  customer:{
+    customerId?:mongoose.Types.ObjectId,
+    name?:string,
+
+  },
+  items:Array<{
+    priceThen:number,
+    productName:string,
+    productId:string,
+    // productId:mongoose.Types.ObjectId,
+    quantity:number
+}>
+}
+const transactionSchema = new mongoose.Schema<ITransaction>(
   {
     issuedTime: { type: Date, default: Date.now(), immutable: true },
 
@@ -70,7 +85,7 @@ transactionSchema.pre("save", async function (next) {
   this.items.forEach((item) => {
     if (item.productId) {
       let product1 = products.find(
-        (product) => product._id.toString() == item.productId
+        (product) => product._id.toString() === item.productId
       );
       if (!product1)
         throw new Error(`Product with id "${item.productId}" not found.`);
@@ -87,7 +102,7 @@ transactionSchema.pre("save", async function (next) {
       if (!product2)
         throw new Error(`Product with name "${item.productName}" not found.`);
 
-      item.productId = new mongoose.Types.ObjectId(product2._id.toString());
+      item.productId = product2._id.toString();
       item.productName = product2.name;
       item.priceThen = product2.price;
     } else throw new Error("provide product name or id");
@@ -105,6 +120,6 @@ transactionSchema.pre("save", async function (next) {
   }
 });
 
-const Transaction = mongoose.model("Transaction", transactionSchema);
+const Transaction = mongoose.model<ITransaction>("Transaction", transactionSchema);
 
 export default Transaction;

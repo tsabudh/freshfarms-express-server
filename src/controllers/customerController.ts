@@ -1,14 +1,20 @@
+import express from "express";
+import Customer from "../models/Customer";
 
-const {Customer} = require("./../models/");
+import mongoose, { DocumentQuery } from "mongoose";
 
-const addCustomer = async (req, res, next) => {
+export const addCustomer = async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
   try {
     let newCustomer = await Customer.create(req.body);
     res.send({
       status: "success",
       data: newCustomer,
     });
-  } catch (error) {
+  } catch (error: any) {
     res.send({
       status: "failure",
       message: error.message,
@@ -16,24 +22,36 @@ const addCustomer = async (req, res, next) => {
   }
 };
 
-const getAllCustomers = async (req, res, next) => {
+export const getAllCustomers = async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
   try {
-    const limit = req.query.limit;
-    const name = req.query.name;
-    const phone = req.query.phone;
+    // const limit = Number(req.query.limit as string);
+    const name = req.query.name as string;
+    const phone = req.query.phone as string;
     const nameExpression = new RegExp(name);
     const phoneExpression = new RegExp(`${phone}`);
 
-    let filter = {};
+    interface Tfilter {
+      name?: any;
+      phone?: any;
+    }
+    let filter: Tfilter = {};
+
     if (name) filter.name = { $regex: nameExpression, $options: "i" };
     if (name) filter.phone = { $regex: phoneExpression };
 
-    let customers = await Customer.find().cache().limit(limit).sort({ name: 1 });
+    let customers: DocumentQuery<any, any> = await Customer.find().cache();
+    // .limit(limit); //!.limit not found on query type
+    // .sort({ name: 1 }); //!.sort not found on query type
+
     res.send({
       status: "success",
       data: customers,
     });
-  } catch (error) {
+  } catch (error: any) {
     res.send({
       status: "failure",
       message: error.message,
@@ -41,7 +59,11 @@ const getAllCustomers = async (req, res, next) => {
   }
 };
 
-const getCustomer = async (req, res, next) => {
+export const getCustomer = async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
   try {
     const customerId = req.params.id;
     const customer = await Customer.findById(customerId);
@@ -49,7 +71,7 @@ const getCustomer = async (req, res, next) => {
       status: "success",
       data: customer,
     });
-  } catch (error) {
+  } catch (error: any) {
     res.send({
       status: "failure",
       message: error.message,
@@ -57,7 +79,11 @@ const getCustomer = async (req, res, next) => {
   }
 };
 
-const updateCustomer = async (req, res, next) => {
+export const updateCustomer = async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
   const customerId = req.params.id;
 
   const newDetails = req.body;
@@ -75,7 +101,7 @@ const updateCustomer = async (req, res, next) => {
       status: "success",
       data: updatedCustomer,
     });
-  } catch (error) {
+  } catch (error: any) {
     const customer = await Customer.findById(customerId);
 
     res.send({
@@ -89,23 +115,19 @@ const updateCustomer = async (req, res, next) => {
   }
 };
 
-const deleteCustomer = async (req, res, next) => {
+export const deleteCustomer = async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
   try {
     const customerId = req.params.id;
     await Customer.findByIdAndDelete(customerId);
-    res.send();
-  } catch (error) {
+    res.status(204).send();
+  } catch (error: any) {
     res.send({
       status: "failure",
       message: error.message,
     });
   }
-};
-
-module.exports = {
-  getAllCustomers,
-  addCustomer,
-  getCustomer,
-  updateCustomer,
-  deleteCustomer,
 };

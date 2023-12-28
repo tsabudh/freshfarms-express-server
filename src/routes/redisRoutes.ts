@@ -1,9 +1,9 @@
-import express from 'express';
+import express from "express";
 
-const redisCache = require("../utils/redisCache");
+import { deleteCache } from "../controllers/cacheController";
 
 const router = express.Router();
 
-// router.route("/").get(redisCache.testCache);
+router.route("/").post(deleteCache);
 
 export default router;
