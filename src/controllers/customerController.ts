@@ -87,7 +87,6 @@ export const updateCustomer = async (
   const customerId = req.params.id;
 
   const newDetails = req.body;
-  console.log(newDetails);
 
   try {
     const updatedCustomer = await Customer.findByIdAndUpdate(

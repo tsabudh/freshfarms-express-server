@@ -14,11 +14,8 @@ export const validateAccount = async function (
   try {
     const { username, password } = req.body;
     const admin = await Admin.findOne({ username: username });
-    console.log(admin);
     if (admin && bcrypt.compareSync(password, admin.password)) {
-      console.log("found and matched");
       res.locals.currentUser = admin.id;
-      console.log(res.locals);
       next();
     } else {
       console.log("account not found/ password incorrect");

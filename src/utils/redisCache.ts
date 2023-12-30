@@ -56,7 +56,7 @@ mongoose.Query.prototype.exec = async function () {
     // If cached, return the results
     if (cachedResult) {
       console.log("CACHE HIT");
-      console.log(cachedResult);
+      // console.log(cachedResult);
       const doc = JSON.parse(cachedResult); //* ERROR OF PARSING AND STRINGIFY
       // const doc = cachedResult;
 
@@ -79,7 +79,6 @@ mongoose.Query.prototype.exec = async function () {
 
 export const clearHash = async function (hashKey = "default") {
   try {
-    console.log(typeof hashKey)
     // if (typeof hashKey != typeof "") JSON.stringify(hashKey);
     await client.flushDb();
     console.log('message')

@@ -67,7 +67,7 @@ transactionSchema.virtual("cost").get(function () {
   let totalCost = 0;
   // console.log(this);
   this.items.forEach((item) => {
-    totalCost += item.priceThen || 0;
+    totalCost += item.priceThen * item.quantity || 0;
   });
   return totalCost;
 });
@@ -80,14 +80,13 @@ transactionSchema.path("customer").validate(function (value) {
 //* reference attachment of product with price at that date
 transactionSchema.pre("save", async function (next) {
   let products = await Product.find().select("name _id price");
-
   this.items.forEach((item) => {
     if (item.productId) {
-      let product1 = products.find(
-        (product) => product._id.toString() === item.productId
-      );
+      let product1 = products.find((product) => {
+        return product._id.toString() === item.productId.toString();
+      });
       if (!product1)
-        throw new Error(`Product with id "${item.productId}" not found.`);
+        throw new Error(`Product with id ${item.productId} not found.`);
 
       // let product1 = await Product.findById(item.productId);
       item.productName = product1.name;
@@ -119,6 +118,11 @@ transactionSchema.pre("save", async function (next) {
     }
   }
 });
+
+//* rejecting if items array is empty
+transactionSchema.pre('save', async function(next){
+  if(this.items.length==0) throw new Error(`Items can't be empty`)
+})
 
 transactionSchema.post("save", async function (next) {
   if (this.customer.customerId) {

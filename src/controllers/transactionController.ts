@@ -11,7 +11,6 @@ export const createTransaction = async (
   try {
     const transactionDetails = req.body;
     const newTransaction = await Transaction.create(transactionDetails);
-
     res.send({
       status: "success",
       data: newTransaction,
@@ -57,7 +56,9 @@ export const getAllTransactions = async (
               input: "$items",
               initialValue: 0,
               in: {
-                $add: ["$$value", "$$this.priceThen"],
+
+                // $add: ["$$value", "$$this.priceThen"],
+                $add: ["$$value", {$multiply: [ "$$this.priceThen", "$$this.quantity" ] }],
               },
             },
           },
@@ -106,11 +107,7 @@ export const getAllTransactions = async (
 
     if (req.query.filter) {
       let filterParamsX = atob(req.query.filter as string);
-      console.log(req.query.filter);
       let filterParams: filterParams = JSON.parse(filterParamsX);
-
-      console.log(req.query.filter);
-      console.log("zizizizi", typeof filterParams);
 
       // let minN = `items.${filterParams?.totalQuantity?.from}`;
       // let maxN = `items.${filterParams?.totalQuantity?.to}`;
@@ -188,7 +185,6 @@ export const getAllTransactions = async (
           $match: { "customer.name": { $in: filterParams.customerArray } },
         });
 
-      console.log("message");
       // console.log(filterParams.sort.byDate);
       if (filterParams.sortBy) {
         let sortBy: filterParams["sortBy"] = {};
@@ -217,7 +213,6 @@ export const getAllTransactions = async (
           },
         });
     }
-
     const mongooseQuery = Transaction.aggregate([...aggregationPipeline]);
 
     const results = await mongooseQuery;
@@ -235,4 +230,3 @@ export const getAllTransactions = async (
     });
   }
 };
-
