@@ -120,15 +120,17 @@ transactionSchema.pre("save", async function (next) {
 });
 
 //* rejecting if items array is empty
-transactionSchema.pre('save', async function(next){
-  if(this.items.length==0) throw new Error(`Items can't be empty`)
-})
+transactionSchema.pre("save", async function (next) {
+  console.log(this.issuedTime);
+  if (this.items.length == 0) throw new Error(`Items can't be empty`);
+});
 
 transactionSchema.post("save", async function (next) {
   if (this.customer.customerId) {
     let customer = await Customer.findById(this.customer.customerId);
     if (customer) {
-      customer.trade.due += this.cost;
+      console.log("customer found with id. ADDING TO TRADE");
+      customer.trade.due = this.cost + customer.trade.due;
       console.log("success");
       await customer.save();
     }

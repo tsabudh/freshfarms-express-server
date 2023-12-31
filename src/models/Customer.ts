@@ -24,6 +24,18 @@ customerSchema.pre("save", function (next) {
 
   next();
 });
+customerSchema.pre("save", async function (next) {
+  if (!this.isNew) next();
+  for (let item of this.phone) {
+    let matched = await Customer.find({ phone: item });
+    console.log(matched);
+    if (matched.length != 0)
+      throw new Error(
+        `This phone number is already registered in another customer's account.`
+      );
+    next();
+  }
+});
 
 let Customer = mongoose.model("Customer", customerSchema);
 
