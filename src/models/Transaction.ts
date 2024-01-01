@@ -12,7 +12,7 @@ interface ITransaction {
   items: Array<{
     priceThen: number;
     productName: string;
-    productId: string;
+    productId: mongoose.Types.ObjectId;
     // productId:mongoose.Types.ObjectId,
     quantity: number;
   }>;
@@ -61,8 +61,6 @@ const transactionSchema = new mongoose.Schema<ITransaction>(
   }
 );
 
-//* virtuals
-
 transactionSchema.virtual("cost").get(function () {
   let totalCost = 0;
   // console.log(this);
@@ -72,12 +70,12 @@ transactionSchema.virtual("cost").get(function () {
   return totalCost;
 });
 
-//* customer object validation
+//- customer object validation
 transactionSchema.path("customer").validate(function (value) {
   if (this.customer.customerId || this.customer.name) return true;
 });
 
-//* reference attachment of product with price at that date
+//- reference attachment of product with price at that date
 transactionSchema.pre("save", async function (next) {
   let products = await Product.find().select("name _id price");
   this.items.forEach((item) => {
@@ -99,7 +97,8 @@ transactionSchema.pre("save", async function (next) {
       if (!product2)
         throw new Error(`Product with name "${item.productName}" not found.`);
 
-      item.productId = product2._id.toString();
+      item.productId = product2._id;
+      // item.productId = product2._id.toString();
       item.productName = product2.name;
       item.priceThen = product2.price;
     } else throw new Error("provide product name or id");
@@ -107,7 +106,7 @@ transactionSchema.pre("save", async function (next) {
   next();
 });
 
-//* assigning customer name from given customer reference _id
+//- assigning customer name from given customer reference _id
 transactionSchema.pre("save", async function (next) {
   if (this.customer.customerId) {
     let customer = await Customer.findById(this.customer.customerId);
@@ -119,26 +118,69 @@ transactionSchema.pre("save", async function (next) {
   }
 });
 
-//* rejecting if items array is empty
+//- rejecting if items for transaction is empty
 transactionSchema.pre("save", async function (next) {
   console.log(this.issuedTime);
   if (this.items.length == 0) throw new Error(`Items can't be empty`);
+  next();
 });
 
-transactionSchema.post("save", async function (next) {
-  if (this.customer.customerId) {
-    let customer = await Customer.findById(this.customer.customerId);
-    if (customer) {
-      console.log("customer found with id. ADDING TO TRADE");
-      customer.trade.due = this.cost + customer.trade.due;
-      console.log("success");
-      await customer.save();
+//- ADDING TRANSACTION COST TO CUSTOMER ACCOUNT TAB
+//todo rename trade as account or tab
+transactionSchema.pre("save", async function (next) {
+  try {
+    if (this.customer.customerId) {
+      let customer = await Customer.findById(this.customer.customerId);
+      if (customer) {
+        console.log("Registered customer found, Adding to customer's tab.");
+        customer.trade.due = this.cost + customer.trade.due;
+        await customer.save();
+      }
     }
+    next();
+  } catch (error: any) {
+    console.log(error);
+    next(error);
   }
 });
+
+//- DECREMENTING STOCK OF ITEMS INVOLVED IN TRANSACTIONS
+transactionSchema.pre("save", async function (next) {
+  // Extracting productIds of all items purchased
+  let productIdArray: Array<mongoose.Types.ObjectId> = this.items.map(
+    (item) => item.productId
+  );
+
+  // Querying product document within extracted productIds
+  let products = await Product.find().where("_id").in(productIdArray);
+
+  for (let item of this.items) {
+    // Match product with the _id equating item's productId
+    let matchedProduct = products.find((product, index, array) => {
+      return product._id.toString() == item.productId.toString();
+    });
+
+    // Add to sales and decrease from stock of matched product
+    if (matchedProduct) {
+      (matchedProduct.stock as number) -= item.quantity as number;
+      (matchedProduct.sales as number) += item.quantity as number;
+      await matchedProduct.save();
+    } else {
+      let err = new Error(
+        "LOGIC ERROR:PRODUCT ID MISMATCH || Product not in Stock"
+      );
+      throw err;
+    }
+  }
+
+  next();
+});
+
+
 const Transaction = mongoose.model<ITransaction>(
   "Transaction",
   transactionSchema
 );
 
 export default Transaction;
+
