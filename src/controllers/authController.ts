@@ -18,8 +18,8 @@ export const validateAccount = async function (
       res.locals.currentUser = admin.id;
       next();
     } else {
-      console.log("account not found/ password incorrect");
-      throw new Error("Account not found. Incorrect password or username");
+      console.log("Account not found. Incorrect password or username.");
+      throw new Error("Account not found. Incorrect password or username.");
     }
   } catch (error: any) {
     console.log(error);
