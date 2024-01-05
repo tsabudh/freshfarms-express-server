@@ -3,8 +3,13 @@ import mongoose from "mongoose";
 import Product from "./Product";
 import Customer from "./Customer";
 
+enum TransactionType {
+  purchase = "purchase",
+  payment = "payment",
+}
 interface ITransaction {
   issuedTime: Date;
+  type: TransactionType;
   customer: {
     customerId?: mongoose.Types.ObjectId;
     name?: string;
@@ -17,11 +22,17 @@ interface ITransaction {
     quantity: number;
   }>;
   cost: number;
+  paidInFull: boolean;
+  paid: number;
 }
 const transactionSchema = new mongoose.Schema<ITransaction>(
   {
     issuedTime: { type: Date, default: Date.now(), immutable: true },
-
+    type: {
+      type: String,
+      enum: [TransactionType.purchase, TransactionType.payment],
+      default: TransactionType.purchase,
+    },
     customer: {
       type: {
         customerId: { type: mongoose.Types.ObjectId, ref: "Customer" },
@@ -50,6 +61,8 @@ const transactionSchema = new mongoose.Schema<ITransaction>(
         quantity: { type: Number, default: 1 },
       },
     ],
+    paidInFull: { type: Boolean, default: true },
+    paid: { type: Number },
   },
   {
     toObject: {
@@ -62,6 +75,7 @@ const transactionSchema = new mongoose.Schema<ITransaction>(
 );
 
 transactionSchema.virtual("cost").get(function () {
+  if (this.type != "purchase") return 0;
   let totalCost = 0;
   // console.log(this);
   this.items.forEach((item) => {
@@ -75,8 +89,18 @@ transactionSchema.path("customer").validate(function (value) {
   if (this.customer.customerId || this.customer.name) return true;
 });
 
+//- CHECK TRANSACTION TYPE
+transactionSchema.pre("save", async function (next) {
+  if (this.type == "payment") {
+    this.items = [];
+    return next();
+  }
+});
+
 //- reference attachment of product with price at that date
 transactionSchema.pre("save", async function (next) {
+  if (this.type != "purchase") return next();
+
   let products = await Product.find().select("name _id price");
   this.items.forEach((item) => {
     if (item.productId) {
@@ -120,20 +144,31 @@ transactionSchema.pre("save", async function (next) {
 
 //- rejecting if items for transaction is empty
 transactionSchema.pre("save", async function (next) {
+  if (this.type != "purchase") return next();
+
   console.log(this.issuedTime);
   if (this.items.length == 0) throw new Error(`Items can't be empty`);
   next();
 });
 
 //- ADDING TRANSACTION COST TO CUSTOMER ACCOUNT TAB
-//todo rename trade as account or tab
 transactionSchema.pre("save", async function (next) {
   try {
     if (this.customer.customerId) {
       let customer = await Customer.findById(this.customer.customerId);
       if (customer) {
         console.log("Registered customer found, Adding to customer's tab.");
-        customer.trade.due = this.cost + customer.trade.due;
+
+        //- ADDING TRANSACTION TO PURCHASE
+        customer.tab.purchase = this.cost + customer.tab.purchase;
+
+        //- IF IT IS A PURCHASE, CHECK IF PURCHASE IS PAID IN FULL
+        if (this.type == "purchase" && this.paidInFull) {
+          customer.tab.paid = customer.tab.paid + this.cost;
+        } else {
+          // add to tab.paid even if transaction type is not 'purchase'
+          customer.tab.paid = customer.tab.paid + this.paid;
+        }
         await customer.save();
       }
     }
@@ -146,36 +181,41 @@ transactionSchema.pre("save", async function (next) {
 
 //- DECREMENTING STOCK OF ITEMS INVOLVED IN TRANSACTIONS
 transactionSchema.pre("save", async function (next) {
-  // Extracting productIds of all items purchased
-  let productIdArray: Array<mongoose.Types.ObjectId> = this.items.map(
-    (item) => item.productId
-  );
+  if (this.type != "purchase") return next();
+  try {
+    // Extracting productIds of all items purchased
+    let productIdArray: Array<mongoose.Types.ObjectId> = this.items.map(
+      (item) => item.productId
+    );
 
-  // Querying product document within extracted productIds
-  let products = await Product.find().where("_id").in(productIdArray);
+    // Querying product document within extracted productIds
+    let products = await Product.find().where("_id").in(productIdArray);
 
-  for (let item of this.items) {
-    // Match product with the _id equating item's productId
-    let matchedProduct = products.find((product, index, array) => {
-      return product._id.toString() == item.productId.toString();
-    });
+    for (let item of this.items) {
+      // Match product with the _id equating item's productId
+      let matchedProduct = products.find((product, index, array) => {
+        return product._id.toString() == item.productId.toString();
+      });
 
-    // Add to sales and decrease from stock of matched product
-    if (matchedProduct) {
-      (matchedProduct.stock as number) -= item.quantity as number;
-      (matchedProduct.sales as number) += item.quantity as number;
-      await matchedProduct.save();
-    } else {
-      let err = new Error(
-        "LOGIC ERROR:PRODUCT ID MISMATCH || Product not in Stock"
-      );
-      throw err;
+      // Add to sales and decrease from stock of matched product
+      if (matchedProduct) {
+        (matchedProduct.stock as number) -= item.quantity as number;
+        (matchedProduct.sales as number) += item.quantity as number;
+        await matchedProduct.save();
+      } else {
+        let err = new Error(
+          "LOGIC ERROR:PRODUCT ID MISMATCH || Product not in Stock"
+        );
+        throw err;
+      }
     }
+
+    next();
+  } catch (error: any) {
+    console.log(error);
+    next(error);
   }
-
-  next();
 });
-
 
 const Transaction = mongoose.model<ITransaction>(
   "Transaction",
@@ -183,4 +223,3 @@ const Transaction = mongoose.model<ITransaction>(
 );
 
 export default Transaction;
-
