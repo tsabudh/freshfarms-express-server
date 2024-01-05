@@ -4,23 +4,24 @@ let customerSchema = new mongoose.Schema({
   name: { type: String, lowercase: true, required: true },
   address: { type: String, lowercase: true },
   phone: [{ type: String, maxLength: 10, minlength: 10, unique: true }],
-  trade: {
+  tab: {
     type: {
-      due: { type: Number, default: 0 },
+      purchase: { type: Number, default:0},
       paid: { type: Number, default: 0 },
-      total: { type: Number },
+      due: { type: Number, default: 0 },
     },
     required: true,
     default: {
       due: 0,
       paid: 0,
-      total: undefined,
+      purchase: 0,
     },
   },
 });
 
+//- ENTRY INTO TABS AFTER PURCHASE
 customerSchema.pre("save", function (next) {
-  this.trade.total = this.trade.due - this.trade.paid;
+ this.tab.due  = this.tab.purchase  - this.tab.paid;
 
   next();
 });
