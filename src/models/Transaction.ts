@@ -27,7 +27,7 @@ interface ITransaction {
 }
 const transactionSchema = new mongoose.Schema<ITransaction>(
   {
-    issuedTime: { type: Date, default: Date.now(), immutable: true },
+    issuedTime: { type: Date, immutable: true },
     type: {
       type: String,
       enum: [TransactionType.purchase, TransactionType.payment],
@@ -74,6 +74,14 @@ const transactionSchema = new mongoose.Schema<ITransaction>(
   }
 );
 
+//- DATE CHECKING
+transactionSchema.pre("save", function (next) {
+  console.log(new Date());
+  this.issuedTime = new Date();
+  next();
+});
+
+//- VIRTUAL PATH COST IMPLEMENTATION
 transactionSchema.virtual("cost").get(function () {
   if (this.type != "purchase") return 0;
   let totalCost = 0;
@@ -165,6 +173,7 @@ transactionSchema.pre("save", async function (next) {
         //- IF IT IS A PURCHASE, CHECK IF PURCHASE IS PAID IN FULL
         if (this.type == "purchase" && this.paidInFull) {
           customer.tab.paid = customer.tab.paid + this.cost;
+          this.paid = this.cost;
         } else {
           // add to tab.paid even if transaction type is not 'purchase'
           customer.tab.paid = customer.tab.paid + this.paid;

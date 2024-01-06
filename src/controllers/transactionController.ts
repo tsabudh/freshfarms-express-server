@@ -52,7 +52,7 @@ export const getAllTransactions = async (
               },
             },
           },
-          transactionAmount: {
+          purchaseAmount: {
             $reduce: {
               input: "$items",
               initialValue: 0,
@@ -83,7 +83,7 @@ export const getAllTransactions = async (
         to: String;
       };
 
-      transactionAmountRange?: {
+      purchaseAmountRange?: {
         from: String;
         to: String;
       };
@@ -96,9 +96,9 @@ export const getAllTransactions = async (
         from: String;
         to: String;
       };
-      productArray: Array<string>;
-      customerArray: Array<string>;
-
+      productArray?: Array<string>;
+      customerArray?: Array<string>;
+      customerIdArray?: Array<string>;
       sortBy: {
         issuedTime?: any;
         customer?: any;
@@ -150,12 +150,12 @@ export const getAllTransactions = async (
           },
         });
 
-      filterParams.transactionAmountRange &&
+      filterParams.purchaseAmountRange &&
         aggregationPipeline.push({
           $match: {
-            transactionAmount: {
-              $gte: filterParams.transactionAmountRange.from,
-              $lte: filterParams.transactionAmountRange.to,
+            purchaseAmount: {
+              $gte: filterParams.purchaseAmountRange.from,
+              $lte: filterParams.purchaseAmountRange.to,
             },
           },
         });
@@ -182,7 +182,7 @@ export const getAllTransactions = async (
       filterParams.priceRange &&
         aggregationPipeline.push({
           $match: {
-            transactionAmount: {
+            purchaseAmount: {
               $gte: filterParams.priceRange.from,
               $lte: filterParams.priceRange.to,
             },
@@ -193,6 +193,15 @@ export const getAllTransactions = async (
           $match: { "customer.name": { $in: filterParams.customerArray } },
         });
 
+      //todo TEST CUSTOMER ID ARRAY, CHECK MONGOOSE OBJECTID TO STRING CASTING
+      filterParams.customerIdArray &&
+        aggregationPipeline.push({
+          $match: {
+            "customer.customerId": {
+              $in: filterParams.customerIdArray,
+            },
+          },
+        });
       // console.log(filterParams.sort.byDate);
       if (filterParams.sortBy) {
         let sortBy: filterParams["sortBy"] = {};

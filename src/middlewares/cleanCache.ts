@@ -1,4 +1,5 @@
 import express from "express";
+import * as validator from "express-validator";
 
 import { clearHash } from "../utils/redisCache";
 const cleanCache = async (
