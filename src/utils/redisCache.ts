@@ -20,7 +20,13 @@ declare module "mongoose" {
 }
 import mongoose from "mongoose";
 
-const client = redis.createClient();
+const client = redis.createClient({
+  password: 'TBNhJVR63wtELcoCbGVPK9vzlsSyyZNT',
+  socket: {
+      host: 'redis-16113.c325.us-east-1-4.ec2.cloud.redislabs.com',
+      port: 16113
+  }
+});
 client.connect();
 
 const exec = mongoose.Query.prototype.exec;

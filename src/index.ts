@@ -13,8 +13,8 @@ const mongoDB: string = (process.env.DATABASE_STRING as string).replace(
   process.env.DATABASE_PASSWORD as string
 );
 // const mongoDB: string = "mongodb://127.0.0.1:27017/shree-krishna";
+// const redisURL: string = "redis://127.0.0.1:6379";
 
-const redisURL: string = "redis://127.0.0.1:6379";
 
 mongoose.Promise = Promise;
 async function connectDatabase() {
@@ -23,8 +23,13 @@ async function connectDatabase() {
     console.log("Connected to Database.");
 
     // Connect to Redis cache
-    const client = redis.createClient({ url: redisURL });
-    await client.connect();
+    const client = redis.createClient({
+      password: 'TBNhJVR63wtELcoCbGVPK9vzlsSyyZNT',
+      socket: {
+          host: 'redis-16113.c325.us-east-1-4.ec2.cloud.redislabs.com',
+          port: 16113
+      }
+  });    await client.connect();
 
     // await client.flushAll();
 
