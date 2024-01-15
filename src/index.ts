@@ -40,10 +40,8 @@ async function connectDatabase() {
   }
 }
 
-const server = https.createServer({
-  key: fs.readFileSync(path.join(__dirname, './../cert', 'key.pem')), cert: fs.readFileSync(path.join(__dirname, './../cert', 'cert.pem')),
-
-}, app);
+// Leftout from HTTPS implementation
+const server =  app;
 
 server.listen(3000, () => { console.log('Server started on port 3000') });
 connectDatabase();
