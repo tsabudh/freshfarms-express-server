@@ -7,7 +7,9 @@ import { checkValidationErrors } from "../Validations/checkValidationErrors";
 import cleanCache from "../middlewares/cleanCache";
 const router = express.Router();
 
-router.route("/signup").post(validateAdminDetails(), checkValidationErrors, cleanCache, adminController.createAdmin);
+router.route("/signup").post(validateAdminDetails(false), checkValidationErrors, cleanCache, adminController.signupAdmin);
+
+router.route("/getMyDetails").get(authController.checkClearance, adminController.getMyDetails)
 
 router
   .route("/login")
