@@ -7,10 +7,8 @@ import * as productController from "../controllers/productController";
 
 import * as customerController from "../controllers/customerController";
 import * as authController from "../controllers/authController";
-import {
-  checkValidationErrors,
-  validateCustomerDetails,
-} from "../Validations/customerValidator";
+import { validateCustomerDetails } from "../Validations/customerValidator";
+import { checkValidationErrors } from '../Validations/checkValidationErrors';
 router
   .route("/")
   .get(authController.checkClearance, customerController.getAllCustomers)
