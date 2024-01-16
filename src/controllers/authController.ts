@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 import express from "express";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 
 import Admin from "../models/Admin";
 
@@ -13,8 +13,9 @@ export const validateAccount = async function (
 ) {
   try {
     const { username, password } = req.body;
-    const admin = await Admin.findOne({ username: username });
+    const admin = await Admin.findOne({ username: username }).select('+password');
     if (admin && bcrypt.compareSync(password, admin.password)) {
+      //- Setting up res.locals for loginAdmin middleware
       res.locals.currentUser = admin.id;
       next();
     } else {
@@ -39,6 +40,7 @@ export const loginAccount = (
     currentUser: res.locals.currentUser,
     issuedAt: Date.now(),
   };
+  console.log(payload)
   let token = jwt.sign(payload, "secretKey", function (error, token) {
     if (error) {
       console.log(error);
@@ -71,6 +73,9 @@ export const checkClearance = (
         });
         return;
       }
+      // console.log(JSON.parse(decodedToken))
+      console.log((decodedToken as JwtPayload).currentUser)
+      res.locals.currentUser = (decodedToken as JwtPayload).currentUser;
       next();
     });
   } else {
