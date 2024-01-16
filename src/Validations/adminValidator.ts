@@ -1,7 +1,7 @@
 import express from "express";
 import * as validator from "express-validator";
 export const validateAdminDetails = (isUpdateRequest = false) => {
-    
+
     //- Pass argument true if it is an update/patch request
     const processIfUpdating = (req: any, field: any) => {
         //todo replace any with suitable types
@@ -36,11 +36,11 @@ export const validateAdminDetails = (isUpdateRequest = false) => {
             .trim()
             .isLength({
                 min: 3,
-                max: 15,
+                max: 25,
             })
-            .withMessage("Provide address within 3-15 characters.")
-        // .custom((value) => /^[a-z][a-z0-9._]*$/.test(value))
-        // .withMessage("Please use alpha-numeric value, starting with alphabets")
+            .withMessage("Provide address within 3-25 characters.")
+            .custom((value) => /^[a-z][a-z0-9._]*$/.test(value))
+            .withMessage("Please use alpha-numeric value, starting with alphabets")
 
     ];
 };
