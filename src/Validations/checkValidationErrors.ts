@@ -6,7 +6,6 @@ export const checkValidationErrors = (
   res: express.Response,
   next: express.NextFunction
 ) => {
-  console.log('jdjdjsnd cm j')
 
   const validationErrors = validator.validationResult(req);
   if (!validationErrors.isEmpty()) {

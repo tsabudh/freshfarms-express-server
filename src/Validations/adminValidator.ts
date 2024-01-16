@@ -1,8 +1,8 @@
 import express from "express";
 import * as validator from "express-validator";
 export const validateAdminDetails = (isUpdateRequest = false) => {
+    
     //- Pass argument true if it is an update/patch request
-    console.log('validating admin details ')
     const processIfUpdating = (req: any, field: any) => {
         //todo replace any with suitable types
         if (isUpdateRequest) {
