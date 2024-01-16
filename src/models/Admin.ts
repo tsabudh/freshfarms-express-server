@@ -6,7 +6,7 @@ const adminSchema = new mongoose.Schema({
   name: { type: String, required: true },
   //   userName:{type:String, }
   phone: [{ type: String, required: true, unique: true }],
-  password: { type: String, required: true },
+  password: { type: String, required: true, select: false },
   createdAt: { type: Date, default: Date.now() },
   username: { type: String, unique: true, required: true },
 });
