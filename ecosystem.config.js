@@ -5,7 +5,7 @@ module.exports = {
       watch: ".",
       name: "skd",
       exec_mode: "cluster",
-      instances: 1,
+      instances: 4,
     },
   ],
 
