@@ -13,6 +13,7 @@ import   redisRouter from "./routes/redisRoutes";
   
 
 import * as authController  from "./controllers/authController";
+import { Request, Response } from "aws-sdk";
 
 const app = express();
 
@@ -35,6 +36,14 @@ app.all("*", (req: Request, res: Response, next: NextFunction) => {
     message: "Missed the route.",
   });
 });
+app.use((error:Error,req:Request,res:Response,next:NextFunction)=>{
+  res.status(400).json({
+    status:'failure',
+    message:error.message,
+    caughtBy:'expressGlobalErrorHandler',
+    error:error
+  })
+})
 
 export default app;
 // export {}
