@@ -1,5 +1,10 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
+import dotenv from 'dotenv';
+
+// dotenv.config({ path: '.env' })
+
+// console.log(process.env.AWS_ACCESS_KEY)
 
 
 const adminSchema = new mongoose.Schema({
@@ -7,6 +12,7 @@ const adminSchema = new mongoose.Schema({
   //   userName:{type:String, }
   phone: [{ type: String, required: true, unique: true }],
   password: { type: String, required: true, select: false },
+  profilePicture:{type:String, required:false},
   createdAt: { type: Date, default: Date.now() },
   username: { type: String, unique: true, required: true },
 });
