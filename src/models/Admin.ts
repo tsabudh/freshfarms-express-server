@@ -12,7 +12,7 @@ const adminSchema = new mongoose.Schema({
   //   userName:{type:String, }
   phone: [{ type: String, required: true, unique: true }],
   password: { type: String, required: true, select: false },
-  profilePicture:{type:String, required:false},
+  profilePicture: { type: String, default: 'default-admin-profile-picture.webp', required: false },
   createdAt: { type: Date, default: Date.now() },
   username: { type: String, unique: true, required: true },
 });

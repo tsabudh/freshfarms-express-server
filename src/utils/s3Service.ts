@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 dotenv.config({ path: '.env' })
 // import AWS from 'aws-sdk';
 
-// // Set your AWS credentials
+// Set your AWS credentials
 // AWS.config.update({
 //   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
 //   secretAccessKey: process.env.ACCESS_SECRET_ACCESS_KEY,
@@ -17,8 +17,8 @@ export const s3uploadV2 = async (file: any) => {
         Bucket: process.env.AWS_BUCKET_NAME,
         Key: `admins/profilePicture/${file.originalname}`,
         Body: file.buffer,
-
     }
 
+    //* Error: Not assignable to putObjectRequest type
     return s3.upload(param).promise();
 }

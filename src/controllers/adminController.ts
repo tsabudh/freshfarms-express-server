@@ -77,10 +77,11 @@ export const uploadPhoto = async (
   next: NextFunction
 ) => {
   try {
-    console.log(req.file)
+
+    console.log(req.file);
     let file = req.file;
 
-    let result = await s3uploadV2(file)
+    let result = await s3uploadV2(file);
 
     res.json({
       status: "success",
@@ -88,6 +89,7 @@ export const uploadPhoto = async (
     });
   } catch (error) {
     console.log(error);
+    next(error);
   }
 
 };
@@ -97,27 +99,33 @@ export const resizeImage = async (
   next: NextFunction
 ) => {
   try {
+    console.log(res.locals.currentUser);
+
+    //- Return error if file is not provided
     if (!req.file) return next(new Error('File not provided!'));
 
+    //- Return error if file type of image is not provided
     if (!req.file.mimetype.startsWith('image')) return next(new Error('Please provide an image file.'))
 
+    //- Make changes to file extension and name
     req.file.mimetype = 'image/webp';
-    req.file.originalname = 'userphoto.webp';
+    req.file.originalname = `${res.locals.currentUser}-profile-picture.webp`;
 
     console.log(req.file);
-    // const buf = await fs.promises.readFile(req.file.path);
 
+    //- Change quality and format and attach it as req.file.buffer for s3UploadV2 function
     req.file.buffer = await sharp(req.file.buffer)
       .resize({ height: 500, width: 500, kernel: sharp.kernel.nearest })
-      // .toFormat("webp")
-      .webp({ quality: 90 })
+      .toFormat("webp")
+      .webp({ quality: 100 })
       .toBuffer()
 
-
-
+    //- Set profile picture to admin
+    await Admin.updateOne({ _id: res.locals.currentUser }, {
+      profilePicture: req.file.originalname
+    })
     next();
-  } catch (error) {
-
+  } catch (error: any) {
     console.log(error);
     res.status(400).json({
       status: 'failure',
