@@ -2,7 +2,7 @@ module.exports = {
   apps: [
     {
       script: "./src/index.ts",
-      watch: "false",
+      watch: ".",
       name: "skd",
       exec_mode: "cluster",
       instances: 4,
