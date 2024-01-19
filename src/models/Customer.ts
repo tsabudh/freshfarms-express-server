@@ -4,9 +4,29 @@ let customerSchema = new mongoose.Schema({
   name: { type: String, lowercase: true, required: true },
   address: { type: String, lowercase: true },
   phone: [{ type: String, maxLength: 10, minlength: 10, unique: true }],
+
+  // Location information (optional)
+  location: {
+    type: {
+      type: String,
+      enum: ['Point']
+    },
+    coordinates: {
+      type: [Number]
+    }
+  },
+  /* 
+  While creating a new customer.
+  location: {
+    type: 'Point',
+    coordinates: [longitude, latitude]
+  }
+  */
+
+  // Customer tabs
   tab: {
     type: {
-      purchase: { type: Number, default:0},
+      purchase: { type: Number, default: 0 },
       paid: { type: Number, default: 0 },
       due: { type: Number, default: 0 },
     },
@@ -21,7 +41,7 @@ let customerSchema = new mongoose.Schema({
 
 //- ENTRY INTO TABS AFTER PURCHASE
 customerSchema.pre("save", function (next) {
- this.tab.due  = this.tab.purchase  - this.tab.paid;
+  this.tab.due = this.tab.purchase - this.tab.paid;
 
   next();
 });

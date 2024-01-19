@@ -47,7 +47,6 @@ export const getMyDetails = async (
 ) => {
   let adminId = res.locals.currentUser;
   let myDetails = await Admin.findById(adminId);
-  console.log(myDetails);
   res.status(200).json({
     status: "success",
     data: myDetails,
@@ -69,9 +68,9 @@ const upload = multer({
   storage,
 });
 
-export const uploadFile = upload.single("photo");
+export const uploadFile = upload.single("profilePhoto");
 
-export const uploadPhoto = async (
+export const uploadPhotoToS3 = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -115,6 +114,7 @@ export const resizeImage = async (
 
     //- Change quality and format and attach it as req.file.buffer for s3UploadV2 function
     req.file.buffer = await sharp(req.file.buffer)
+      .rotate()
       .resize({ height: 500, width: 500, kernel: sharp.kernel.nearest })
       .toFormat("webp")
       .webp({ quality: 100 })

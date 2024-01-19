@@ -20,8 +20,8 @@ router.use(authController.checkClearance);
 
 router.route("/getMyDetails").get(adminController.getMyDetails)
 
-router.route("/upload")
-  .post(adminController.uploadFile, adminController.resizeImage, adminController.uploadPhoto);
+router.route("/uploadProfilePicture")
+  .post(adminController.uploadFile, adminController.resizeImage, cleanCache, adminController.uploadPhotoToS3);
 
 router.route("/logout").post(authController.logoutAccount);
 
