@@ -2,10 +2,10 @@ module.exports = {
   apps: [
     {
       script: "./src/index.ts",
-      watch: ".",
+      watch: false,
       name: "skd",
       exec_mode: "cluster",
-      instances: 4,
+      instances: 2,
       autorestart: true,
     },
   ],
