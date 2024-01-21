@@ -18,7 +18,7 @@ const adminSchema = new mongoose.Schema({
 });
 
 
-//- CHECK USERNAME VALIDITY
+//- Checking format of provided username
 adminSchema.pre("save", function (next) {
   let matches = /^[a-z][a-z0-9._]*$/.test(this.username);
   if (!matches) {
@@ -30,6 +30,24 @@ adminSchema.pre("save", function (next) {
   }
   next();
 });
+
+
+//- Ensuring that provided username is unique
+adminSchema.pre("save", async function (next) {
+  if (!this.isNew) next();
+  this.username = this.username.toLocaleLowerCase();
+  
+  let matched = await Admin.find({ username: this.username });
+  if (matched.length != 0) {
+    throw new Error(
+      `This username is taken. Try another one.`
+    );
+
+  } else {
+    next();
+  }
+})
+
 
 adminSchema.pre("save", function (next) {
   const salt = bcrypt.genSaltSync(10);
