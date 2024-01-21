@@ -25,7 +25,7 @@ export const signupAdmin = async (
     };
 
     console.log(payload);
-    let token = jwt.sign(payload, "secretKey");
+    let token = jwt.sign(payload, (process.env.JWT_SECRET_KEY as string));
 
     res.send({
       status: "success",
@@ -53,14 +53,7 @@ export const getMyDetails = async (
   });
 };
 
-const multerStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "src/localData");
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + "-" + file.originalname);
-  },
-});
+
 
 const storage = multer.memoryStorage();
 
@@ -133,3 +126,27 @@ export const resizeImage = async (
     })
   }
 };
+
+export const updateMe = async (req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+
+  try {
+    let id = res.locals.currentUser;
+    let newDetails = req.body;
+    let result = await Admin.findOneAndUpdate({ _id: id }, newDetails, { new: true })
+
+    res.status(200).json({
+      status: 'success',
+      data: result
+    })
+  } catch (error: any) {
+    console.log(error);
+    res.status(400).json({
+      status: 'failure',
+      message: error.message
+    })
+  }
+
+}

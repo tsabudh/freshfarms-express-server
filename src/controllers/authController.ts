@@ -40,8 +40,7 @@ export const loginAccount = (
     currentUser: res.locals.currentUser,
     issuedAt: Date.now(),
   };
-  console.log(payload)
-  let token = jwt.sign(payload, "secretKey", function (error, token) {
+  let token = jwt.sign(payload, (process.env.JWT_SECRET_KEY as string), function (error, token) {
     if (error) {
       console.log(error);
     }
@@ -64,7 +63,7 @@ export const checkClearance = (
   if (bearerHeader) {
     const bearerToken = bearerHeader.split(" ")[1];
 
-    jwt.verify(bearerToken, "secretKey", (error, decodedToken) => {
+    jwt.verify(bearerToken, (process.env.JWT_SECRET_KEY as string), (error, decodedToken) => {
       if (error) {
         console.log(error);
         res.send({
