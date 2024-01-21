@@ -20,6 +20,7 @@ router.use(authController.checkClearance);
 
 router.route("/getMyDetails").get(adminController.getMyDetails)
 
+router.route("/updateMe").patch(validateAdminDetails(true), checkValidationErrors, cleanCache, adminController.updateMe)
 router.route("/uploadProfilePicture")
   .post(adminController.uploadFile, adminController.resizeImage, cleanCache, adminController.uploadPhotoToS3);
 
