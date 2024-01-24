@@ -9,7 +9,9 @@ export const createTransaction = async (
   next: express.NextFunction
 ) => {
   try {
+    console.log(res.locals.currentUser);
     const transactionDetails = req.body;
+    transactionDetails.createdBy = res.locals.currentUser;
     const newTransaction = await Transaction.create(transactionDetails);
 
     res.send({
