@@ -1,5 +1,8 @@
 import * as redis from "redis";
 // import mongoose, { QueryOptions, mongo } from "mongoose";
+import path from 'path';
+import dotenv from "dotenv";
+dotenv.config({ path: path.join(__dirname + "../../../.env") });
 
 declare module "mongoose" {
   interface DocumentQuery<
@@ -21,12 +24,12 @@ declare module "mongoose" {
 import mongoose from "mongoose";
 
 const client = redis.createClient({
-  password: 'TBNhJVR63wtELcoCbGVPK9vzlsSyyZNT',
+  password: process.env.REDIS_PASSWORD,
   socket: {
-      host: 'redis-16113.c325.us-east-1-4.ec2.cloud.redislabs.com',
-      port: 16113
+    host: process.env.REDIS_SOCKET_HOST,
+    port: Number(process.env.REDIS_SOCKET_PORT)
   }
-});
+}); 
 client.connect();
 
 const exec = mongoose.Query.prototype.exec;
@@ -87,7 +90,6 @@ export const clearHash = async function (hashKey = "default") {
   try {
     // if (typeof hashKey != typeof "") JSON.stringify(hashKey);
     await client.flushDb();
-    console.log('message')
   } catch (error: any) {
     console.log(error);
   }

@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import * as redis from "redis";
-import https from 'https'
-import fs from 'fs';
+
 import dotenv from "dotenv";
 import app from "./app";
 import path from "path";
@@ -22,14 +21,15 @@ async function connectDatabase() {
     await mongoose.connect(mongoDB);
     console.log("Connected to Database.");
 
-    // Connect to Redis cache
+   
     const client = redis.createClient({
-      password: 'TBNhJVR63wtELcoCbGVPK9vzlsSyyZNT',
+      password: process.env.REDIS_PASSWORD,
       socket: {
-        host: 'redis-16113.c325.us-east-1-4.ec2.cloud.redislabs.com',
-        port: 16113
+        host: process.env.REDIS_SOCKET_HOST,
+        port: Number(process.env.REDIS_SOCKET_PORT)
       }
-    }); await client.connect();
+    }); 
+    await client.connect();
 
 
     console.log("Connected to Redis.");
