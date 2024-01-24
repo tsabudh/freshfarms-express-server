@@ -11,19 +11,20 @@ interface ITransaction {
   issuedTime: Date;
   type: TransactionType;
   customer: {
-    customerId?: mongoose.Types.ObjectId;
+    customerId?: mongoose.Schema.Types.ObjectId;
     name?: string;
   };
   items: Array<{
     priceThen: number;
     productName: string;
-    productId: mongoose.Types.ObjectId;
+    productId: mongoose.Schema.Types.ObjectId;
     // productId:mongoose.Types.ObjectId,
     quantity: number;
   }>;
   cost: number;
   paidInFull: boolean;
   paid: number;
+  createdBy: mongoose.Schema.Types.ObjectId;
 }
 const transactionSchema = new mongoose.Schema<ITransaction>(
   {
@@ -63,6 +64,7 @@ const transactionSchema = new mongoose.Schema<ITransaction>(
     ],
     paidInFull: { type: Boolean, default: true },
     paid: { type: Number },
+    createdBy: { type: mongoose.Types.ObjectId, ref: 'Admin', required: true }
   },
   {
     toObject: {
@@ -70,7 +72,7 @@ const transactionSchema = new mongoose.Schema<ITransaction>(
     },
     toJSON: {
       virtuals: true,
-    },
+    }, timestamps: true
   }
 );
 
