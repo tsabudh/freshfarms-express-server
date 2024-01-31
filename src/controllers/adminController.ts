@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import multer from "multer";
 import sharp from "sharp";
+import fs from 'fs';
+
 
 import * as jwt from "jsonwebtoken";
 import Admin from "../models/Admin";
@@ -23,8 +25,13 @@ export const signupAdmin = async (
       issuedAt: Date.now(),
     };
 
-    console.log(payload);
-    let token = jwt.sign(payload, (process.env.JWT_SECRET_KEY as string));
+    // console.log(payload);
+  
+    // token = jwt.sign(payload, (process.env.JWT_SECRET_KEY as string));
+
+    const secret = fs.readFileSync('../../certs/private.pem');
+    let token = jwt.sign(payload, secret, { expiresIn: '60min', algorithm: 'RS256' });
+
 
     res.send({
       status: "success",
@@ -90,7 +97,6 @@ export const resizeImage = async (
   next: NextFunction
 ) => {
   try {
-    console.log(res.locals.currentUser);
 
     //- Return error if file is not provided
     if (!req.file) return next(new Error('File not provided!'));

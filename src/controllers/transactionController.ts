@@ -9,7 +9,6 @@ export const createTransaction = async (
   next: express.NextFunction
 ) => {
   try {
-    console.log(res.locals.currentUser);
     const transactionDetails = req.body;
     transactionDetails.createdBy = res.locals.currentUser;
     const newTransaction = await Transaction.create(transactionDetails);
@@ -26,13 +25,7 @@ export const createTransaction = async (
   }
 };
 
-export const editTransaction = (
-  req: express.Request,
-  res: express.Response,
-  next: express.NextFunction
-) => {
-  next();
-};
+
 
 export const getAllTransactions = async (
   req: express.Request,
@@ -115,8 +108,8 @@ export const getAllTransactions = async (
       let filterParamsX = atob(req.query.filter as string);
       let filterParams: filterParams = JSON.parse(filterParamsX);
 
-      console.log(filterParamsX);
-      console.log(req.query.filter);
+      // console.log(filterParamsX);
+      // console.log(req.query.filter);
       //* EXPERIMENTAL
       // let minN = `items.${filterParams?.totalQuantity?.from}`;
       // let maxN = `items.${filterParams?.totalQuantity?.to}`;
@@ -254,3 +247,4 @@ export const getAllTransactions = async (
     });
   }
 };
+
