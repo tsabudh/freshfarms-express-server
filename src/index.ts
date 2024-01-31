@@ -21,14 +21,14 @@ async function connectDatabase() {
     await mongoose.connect(mongoDB);
     console.log("Connected to Database.");
 
-   
+
     const client = redis.createClient({
       password: process.env.REDIS_PASSWORD,
       socket: {
         host: process.env.REDIS_SOCKET_HOST,
         port: Number(process.env.REDIS_SOCKET_PORT)
       }
-    }); 
+    });
     await client.connect();
 
 
