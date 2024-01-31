@@ -7,6 +7,7 @@ enum TransactionType {
   purchase = "purchase",
   payment = "payment",
 }
+
 interface ITransaction {
   issuedTime: Date;
   type: TransactionType;
@@ -18,7 +19,6 @@ interface ITransaction {
     priceThen: number;
     productName: string;
     productId: mongoose.Schema.Types.ObjectId;
-    // productId:mongoose.Types.ObjectId,
     quantity: number;
   }>;
   cost: number;
