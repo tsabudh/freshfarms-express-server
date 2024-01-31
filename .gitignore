@@ -2,5 +2,5 @@
 .vscode/
 
 .env
-cert
+cert*
 src/localData
