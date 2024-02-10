@@ -26,7 +26,7 @@ export const signupAdmin = async (
     };
 
     // console.log(payload);
-  
+
     // token = jwt.sign(payload, (process.env.JWT_SECRET_KEY as string));
 
     const secret = fs.readFileSync('../../certs/private.pem');
@@ -51,12 +51,22 @@ export const getMyDetails = async (
   res: Response,
   next: NextFunction
 ) => {
-  let adminId = res.locals.currentUser;
-  let myDetails = await Admin.findById(adminId);
-  res.status(200).json({
-    status: "success",
-    data: myDetails,
-  });
+
+  try {
+    let adminId = res.locals.currentUser;
+    console.log(adminId);
+    let myDetails = await Admin.findById(adminId);
+    res.status(200).json({
+      status: "success",
+      data: myDetails,
+    });
+  } catch (error: any) {
+    res.status(400).json({
+      status: 'failure',
+      message: error.message
+    })
+  }
+
 };
 
 
