@@ -231,8 +231,9 @@ export const getAllTransactions = async (
     }
 
     const mongooseQuery = Transaction.aggregate([...aggregationPipeline]);
-
+    
     const results = await mongooseQuery;
+    
     res.send({
       status: "success",
       numberOfResults: results.length,
