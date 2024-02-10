@@ -4,7 +4,7 @@ import crypto from 'crypto';
 
 
 function pemToJWK(pem: any, isPrivate: boolean) {
-   
+
     const key = isPrivate
         ? crypto.createPrivateKey(pem)
         : crypto.createPublicKey(pem);
@@ -15,7 +15,7 @@ function pemToJWK(pem: any, isPrivate: boolean) {
     }, key.export({ format: 'jwk' }));
 
 
-   return jwk;
+    return jwk;
 }
 
 export function generateJWKS(publicPemFile: any) {
@@ -49,3 +49,9 @@ export function generateJWKS(publicPemFile: any) {
 
 // let decoded = jwt.verify(token, clientPub, { algorithms: ['RS256'] });
 // console.log(decoded);
+
+export function signJWT(payload: Object) {
+    const secret = fs.readFileSync('certs/private.pem');
+    let token = jwt.sign(payload, secret, { expiresIn: '1d', algorithm: 'RS256' });
+    return token;
+}
