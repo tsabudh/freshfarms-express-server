@@ -9,6 +9,7 @@ import { generateJWKS } from "../utils/jwt";
 
 import Admin from "../models/Admin";
 import AppError from "../utils/appError";
+import { signJWT } from "../utils/jwt";
 
 export const validateAccount = async function (
   req: express.Request,
@@ -110,18 +111,16 @@ export const checkClearance = (
     //   next();
     // });
 
-    // const privatePemFile = 'certs/private.pem';
-    const publicPemFile = 'certs/public.pem';
+    const clientPub = fs.readFileSync('certs/public.pem');
+
+    let decodedToken = jwt.verify(bearerToken, clientPub, { algorithms: ['RS256'] })
 
 
-    const jwks = generateJWKS(publicPemFile);
-    // console.log(JSON.stringify(jwks, null, 2));
+    res.locals.currentUser = (decodedToken as JwtPayload).currentUser;
+    console.log(res.locals.currentUser);
 
-    // res.locals.currentUser = (decodedToken as JwtPayload).currentUser;
-    // console.log(res.locals.currentUser);
     next();
 
-    // console.log(jwks)
   } else {
     res.send({
       status: "failure",
@@ -140,9 +139,42 @@ export const logoutAccount = (
     token: "Invalid Token",
   });
 };
-// module.exports = {
-//   validateAccount,
-//   loginAccount,
-//   checkClearance,
-//   logoutAccount,
-// };
+
+
+export const refreshJWTToken = (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
+  try {
+    const bearerHeader = req.headers.authorization;
+
+    if (bearerHeader) {
+      const bearerToken = bearerHeader.split(" ")[1];
+
+      const clientPub = fs.readFileSync('certs/public.pem');
+
+      let decodedToken = jwt.verify(bearerToken, clientPub, { algorithms: ['RS256'] })
+
+      // decodedToken = JSON.parse(decodedToken as string);
+      let payload = { currentUser: decodedToken.currentUser };
+
+      let token = signJWT(payload);
+
+      res.status(200).json({
+        status: 'success',
+        token,
+
+      })
+
+    }
+  } catch (error: any) {
+    res.status(400).json({
+      status: 'failure',
+      message: error.message
+    })
+  }
+
+
+
+}
