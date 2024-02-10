@@ -15,6 +15,8 @@ router
 
 router.route("/signup").post(validateAdminDetails(false), checkValidationErrors, cleanCache, adminController.signupAdmin);
 
+router.route("/refreshToken").get(authController.refreshJWTToken);
+
 //- Check clearance at all routes except login or signup
 router.use(authController.checkClearance);
 
