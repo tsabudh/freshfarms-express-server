@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 import Product from "./Product";
 import Customer from "./Customer";
+import AppError from "../utils/appError";
 
 enum TransactionType {
   purchase = "purchase",
@@ -103,6 +104,17 @@ transactionSchema.path("customer").validate(function (value) {
 transactionSchema.pre("save", async function (next) {
   if (this.type == "payment") {
     this.items = [];
+
+    console.log(typeof this.paid);
+    // Refuse to make payment of 0 
+    if (this.paid <= 0) {
+      throw new AppError('Payment cannot be zero or negative.', 400)
+    }
+    // Refuse to make payment of float
+    if (this.paid % 1 != 0) {
+      throw new AppError('Payment cannot be a decimal number', 400)
+    }
+
     return next();
   }
 });
