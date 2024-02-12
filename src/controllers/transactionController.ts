@@ -108,7 +108,7 @@ export const getAllTransactions = async (
       let filterParamsX = atob(req.query.filter as string);
       let filterParams: filterParams = JSON.parse(filterParamsX);
 
-      // console.log(filterParamsX);
+      console.log(filterParamsX);
       // console.log(req.query.filter);
       //* EXPERIMENTAL
       // let minN = `items.${filterParams?.totalQuantity?.from}`;
@@ -155,7 +155,7 @@ export const getAllTransactions = async (
           },
         });
 
-      filterParams.issuedTime &&
+      filterParams.issuedTime && 
         aggregationPipeline.push({
           $match: {
             issuedTime: {
@@ -230,10 +230,26 @@ export const getAllTransactions = async (
         });
     }
 
+    //- Populating createBy field with admin's name & _id
+    aggregationPipeline.push({
+      $lookup: {
+        from: "admins",
+        localField: "createdBy",
+        foreignField: "_id",
+        pipeline: [{ $project: { name: 1 } }],
+        as: "issuedBy",
+      },
+    })
+    aggregationPipeline.push({
+      $unwind: "$issuedBy"
+    });
+
+
+
     const mongooseQuery = Transaction.aggregate([...aggregationPipeline]);
-    
+
     const results = await mongooseQuery;
-    
+
     res.send({
       status: "success",
       numberOfResults: results.length,
