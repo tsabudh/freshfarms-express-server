@@ -14,7 +14,7 @@ const adminSchema = new mongoose.Schema({
   password: { type: String, required: true, select: false },
   profilePicture: { type: String, default: 'default-admin-profile-picture.webp', required: false },
   createdAt: { type: Date, default: Date.now() },
-  username: { type: String, unique: true, required: true },
+  username: { type: String, unique: true, required: true, lowercase: true },
 });
 
 
@@ -36,7 +36,7 @@ adminSchema.pre("save", function (next) {
 adminSchema.pre("save", async function (next) {
   if (!this.isNew) next();
   this.username = this.username.toLocaleLowerCase();
-  
+
   let matched = await Admin.find({ username: this.username });
   if (matched.length != 0) {
     throw new Error(
