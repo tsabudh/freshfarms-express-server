@@ -96,20 +96,7 @@ export const checkClearance = (
   if (bearerHeader) {
     const bearerToken = bearerHeader.split(" ")[1];
 
-    // jwt.verify(bearerToken, (process.env.JWT_SECRET_KEY as string), (error, decodedToken) => {
-    //   if (error) {
-    //     console.log(error);
-    //     res.send({
-    //       status: "failure",
-    //       message: error.message,
-    //     });
-    //     return;
-    //   }
-    //   // console.log(JSON.parse(decodedToken))
-    //   console.log((decodedToken as JwtPayload).currentUser)
-    //   res.locals.currentUser = (decodedToken as JwtPayload).currentUser;
-    //   next();
-    // });
+ 
 
     const clientPub = fs.readFileSync('certs/public.pem');
 

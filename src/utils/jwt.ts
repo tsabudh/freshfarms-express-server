@@ -51,6 +51,8 @@ export function generateJWKS(publicPemFile: any) {
 // console.log(decoded);
 
 export function signJWT(payload: Object) {
+    console.log('called Function signJWTToken');
+
     const secret = fs.readFileSync('certs/private.pem');
     let token = jwt.sign(payload, secret, { expiresIn: '1d', algorithm: 'RS256' });
     return token;
