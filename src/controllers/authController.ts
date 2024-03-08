@@ -96,7 +96,7 @@ export const checkClearance = (
   if (bearerHeader) {
     const bearerToken = bearerHeader.split(" ")[1];
 
- 
+
 
     const clientPub = fs.readFileSync('certs/public.pem');
 
