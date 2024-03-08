@@ -12,6 +12,7 @@ enum TransactionType {
 interface ITransaction {
   issuedTime: Date;
   type: TransactionType;
+  contract: boolean;
   customer: {
     customerId?: mongoose.Schema.Types.ObjectId;
     name?: string;
@@ -64,6 +65,7 @@ const transactionSchema = new mongoose.Schema<ITransaction>(
       },
     ],
     paidInFull: { type: Boolean, default: true },
+    contract: { type: Boolean, default: false },
     paid: { type: Number },
     createdBy: { type: mongoose.Types.ObjectId, ref: 'Admin', required: true }
   },
