@@ -79,9 +79,11 @@ export const getOne = (Model: Model<Schema>, popOptions: AnyObject) =>
     next();
   });
 
-export const getAll = (Model:Model<Schema>) =>
+export const getAll = (Model: Model<Schema>) =>
   catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const doc = await Model.find();
+
+    if (!doc) throw new AppError('Document not found', 400);
 
     //SEND RESPONSE
     res.status(200).json({
