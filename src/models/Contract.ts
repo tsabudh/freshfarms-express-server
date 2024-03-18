@@ -18,13 +18,16 @@ interface IContract {
 
 const contractSchema = new mongoose.Schema<IContract>({
     customerId: {
-        type: mongoose.Schema.ObjectId, ref: "Customer"
+        type: mongoose.Schema.ObjectId, ref: "Customer",
+        required:true
 
     },
     items: [
         {
-            productId: mongoose.Schema.ObjectId,
-            ref: "Product",
+            productId: {
+                type: mongoose.Schema.ObjectId,
+                ref: "Product",
+            },
             quantity: Number,
             price: Number,
         }
