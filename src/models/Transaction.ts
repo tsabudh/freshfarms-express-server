@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import Product from "./Product";
 import Customer from "./Customer";
 import AppError from "../utils/appError";
+import Contract from "./Contract";
 
 enum TransactionType {
   purchase = "purchase",
@@ -13,6 +14,7 @@ interface ITransaction {
   issuedTime: Date;
   type: TransactionType;
   contract: boolean;
+  contractId: mongoose.Schema.Types.ObjectId;
   customer: {
     customerId?: mongoose.Schema.Types.ObjectId;
     name?: string;
@@ -66,6 +68,16 @@ const transactionSchema = new mongoose.Schema<ITransaction>(
     ],
     paidInFull: { type: Boolean, default: true },
     contract: { type: Boolean, default: false },
+    contractId: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'Contract',
+      required: [
+        function () {
+          return this.contract === true
+        },
+        'Please provide a contract id for reference.']
+    },
+
     paid: { type: Number },
     createdBy: { type: mongoose.Types.ObjectId, ref: 'Admin', required: true }
   },
@@ -85,6 +97,22 @@ transactionSchema.pre("save", function (next) {
   this.issuedTime = new Date();
   next();
 });
+
+//- CONTRACT CASES
+transactionSchema.pre("save", async function (next) {
+
+  if (this.contract != true) next();
+
+  let contract = await Contract.findById(this.contractId);
+  console.log('message', contract);
+  if (!contract) throw new AppError('Contract not found of given contract Id.', 400);
+
+  if (contract) {
+
+    this.items = contract.items.map(item => { return ({ quantity: item.quantity, productId: item.productId }) })
+  }
+});
+
 
 //- VIRTUAL PATH COST IMPLEMENTATION
 transactionSchema.virtual("cost").get(function () {
@@ -126,29 +154,30 @@ transactionSchema.pre("save", async function (next) {
   if (this.type != "purchase") return next();
 
   let products = await Product.find().select("name _id price");
+  console.log(products);
   this.items.forEach((item) => {
     if (item.productId) {
-      let product1 = products.find((product) => {
+      let productById = products.find((product) => {
         return product._id.toString() === item.productId.toString();
       });
-      if (!product1)
+      if (!productById)
         throw new Error(`Product with id ${item.productId} not found.`);
 
-      // let product1 = await Product.findById(item.productId);
-      item.productName = product1.name;
-      item.priceThen = product1.price;
+      // let productById = await Product.findById(item.productId);
+      item.productName = productById.name;
+      item.priceThen = productById.price;
     } else if (item.productName) {
-      let product2 = products.find((product) => {
+      let productByName = products.find((product) => {
         if (item.productName && product.name == item.productName)
           return item.productName.trim().toLocaleLowerCase();
       });
-      if (!product2)
+      if (!productByName)
         throw new Error(`Product with name "${item.productName}" not found.`);
 
-      item.productId = product2._id;
-      // item.productId = product2._id.toString();
-      item.productName = product2.name;
-      item.priceThen = product2.price;
+      item.productId = productByName._id;
+      // item.productId = productByName._id.toString();
+      item.productName = productByName.name;
+      item.priceThen = productByName.price;
     } else throw new Error("provide product name or id");
   });
   next();
