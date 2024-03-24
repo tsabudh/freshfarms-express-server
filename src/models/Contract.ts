@@ -11,9 +11,11 @@ interface IContract {
     items: Array<{
         quantity: Number;
         price: Number;
+        productId: mongoose.Schema.Types.ObjectId;
 
     }>;
     interval: Number;
+    commencedDate: Array<{}>
 }
 
 const contractSchema = new mongoose.Schema<IContract>({
@@ -38,9 +40,44 @@ const contractSchema = new mongoose.Schema<IContract>({
     },
     interval: {
         type: Number
+    },
+    commencedDate: {
+        type: [
+            {
+                type: Date,
+
+            }
+        ]
     }
 
+
+
 });
+
+
+
+
+contractSchema.pre('save', async function (next) {
+
+    let products = await Product.find().select("name _id price");
+
+    this.items.forEach((item) => {
+        if (item.productId) {
+            let productById = products.find((product) => {
+                return product._id.toString() === item.productId.toString();
+            });
+            if (!productById)
+                throw new Error(`Product with id ${item.productId} not found.`);
+
+            // let productById = await Product.findById(item.productId);
+            //   item.productName = productById.name;
+            //   item.priceThen = productById.price;
+        }
+    })
+    next();
+}
+)
+
 
 const Contract = mongoose.model('Contract', contractSchema);
 
