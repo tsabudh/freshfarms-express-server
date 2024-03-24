@@ -2,6 +2,7 @@ import mongoose, { PipelineStage } from "mongoose";
 import express from "express";
 
 import Transaction from "../models/Transaction";
+import catchAsync from "../utils/catchAsync";
 
 export const createTransaction = async (
   req: express.Request,
@@ -265,3 +266,11 @@ export const getAllTransactions = async (
   }
 };
 
+export const createManyTransactionsOnContract = catchAsync(async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
+const contracts = req.body.contracts;
+
+})
