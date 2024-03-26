@@ -15,7 +15,7 @@ export const markTodaysDelivery = catchAsync(async (req: Request, res: Response,
     const details = req.body;
     const toUpdate = details.contracts;
     console.log(toUpdate);
-    await Contract.updateMany(
+    let results = await Contract.updateMany(
         {
             _id: { $in: toUpdate }
         },
@@ -25,7 +25,8 @@ export const markTodaysDelivery = catchAsync(async (req: Request, res: Response,
 
 
     res.json({
-        status: 'success'
+        status: 'success',
+        data: results
     })
 
 });
