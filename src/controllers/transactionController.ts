@@ -156,7 +156,7 @@ export const getAllTransactions = async (
           },
         });
 
-      filterParams.issuedTime && 
+      filterParams.issuedTime &&
         aggregationPipeline.push({
           $match: {
             issuedTime: {
@@ -232,23 +232,22 @@ export const getAllTransactions = async (
     }
 
     //- Populating createBy field with admin's name & _id
-    aggregationPipeline.push({
-      $lookup: {
-        from: "admins",
-        localField: "createdBy",
-        foreignField: "_id",
-        pipeline: [{ $project: { name: 1 } }],
-        as: "issuedBy",
-      },
-    })
-    aggregationPipeline.push({
-      $unwind: "$issuedBy"
-    });
+    // aggregationPipeline.push({
+    //   $lookup: {
+    //     from: "admins",
+    //     localField: "createdBy",
+    //     foreignField: "_id",
+    //     pipeline: [{ $project: { name: 1 } }],
+    //     as: "issuedBy",
+    //   },
+    // })
+    // aggregationPipeline.push({
+    //   $unwind: "$issuedBy"
+    // });
 
 
 
     const mongooseQuery = Transaction.aggregate([...aggregationPipeline]);
-
     const results = await mongooseQuery;
 
     res.send({
@@ -271,6 +270,6 @@ export const createManyTransactionsOnContract = catchAsync(async (
   res: express.Response,
   next: express.NextFunction
 ) => {
-const contracts = req.body.contracts;
+  const contracts = req.body.contracts;
 
 })
