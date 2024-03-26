@@ -109,7 +109,10 @@ transactionSchema.pre("save", async function (next) {
 
   if (contract) {
 
-    this.items = contract.items.map(item => { return ({ quantity: item.quantity, productId: item.productId }) })
+    this.items = contract.items.map(item => { return ({ quantity: item.quantity, productId: item.productId }) });
+    this.paid = 0;
+    contract.commencedDate.push(Date.now());
+    await contract.save();
   }
 });
 
