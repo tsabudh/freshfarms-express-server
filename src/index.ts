@@ -12,8 +12,8 @@ dotenv.config({ path: path.join(__dirname + "../../.env") });
 //   process.env.DATABASE_PASSWORD as string
 // );
 
-const mongoDB: string = "mongodb://127.0.0.1:27017/shree-krishna";
-// const redisURL: string = "redis://127.0.0.1:6379";
+// const mongoDB: string = "mongodb://127.0.0.1:27017/shree-krishna";
+const redisURL: string = "redis://127.0.0.1:6379";
 
 
 mongoose.Promise = Promise;
