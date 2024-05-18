@@ -9,6 +9,6 @@ const router = express.Router();
 router
   .route("/")
   .get(transactionController.getAllTransactions)
-  .post(authController.checkClearance, cleanCache, transactionController.createTransaction);
+  .post(authController.checkClearance, transactionController.createTransaction);
 
-export default  router;
+export default router;

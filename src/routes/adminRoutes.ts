@@ -13,7 +13,7 @@ router
   .route("/login")
   .post(authController.validateAccount, authController.loginAccount);
 
-router.route("/signup").post(validateAdminDetails(false), checkValidationErrors, cleanCache, adminController.signupAdmin);
+router.route("/signup").post(validateAdminDetails(false), checkValidationErrors, adminController.signupAdmin);
 
 router.route("/refreshToken").get(authController.refreshJWTToken);
 
@@ -22,9 +22,9 @@ router.use(authController.checkClearance);
 
 router.route("/getMyDetails").get(adminController.getMyDetails)
 
-router.route("/updateMe").patch(validateAdminDetails(true), checkValidationErrors, cleanCache, adminController.updateMe)
+router.route("/updateMe").patch(validateAdminDetails(true), checkValidationErrors, adminController.updateMe)
 router.route("/uploadProfilePicture")
-  .post(adminController.uploadFile, adminController.resizeImage, cleanCache, adminController.uploadPhotoToS3);
+  .post(adminController.uploadFile, adminController.resizeImage, adminController.uploadPhotoToS3);
 
 router.route("/logout").post(authController.logoutAccount);
 

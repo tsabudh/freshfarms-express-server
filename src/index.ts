@@ -7,12 +7,12 @@ import path from "path";
 
 dotenv.config({ path: path.join(__dirname + "../../.env") });
 
-const mongoDB: string = (process.env.DATABASE_STRING as string).replace(
-  "<password>",
-  process.env.DATABASE_PASSWORD as string
-);
+// const mongoDB: string = (process.env.DATABASE_STRING as string).replace(
+//   "<password>",
+//   process.env.DATABASE_PASSWORD as string
+// );
 
-// const mongoDB: string = "mongodb://127.0.0.1:27017/shree-krishna";
+const mongoDB: string = "mongodb://127.0.0.1:27017/shree-krishna";
 // const redisURL: string = "redis://127.0.0.1:6379";
 
 
@@ -23,17 +23,17 @@ async function connectDatabase() {
     console.log("Connected to Database.");
 
 
-    const client = redis.createClient({
-      password: process.env.REDIS_PASSWORD,
-      socket: {
-        host: process.env.REDIS_SOCKET_HOST,
-        port: Number(process.env.REDIS_SOCKET_PORT)
-      }
-    });
-    await client.connect();
+    // const client = redis.createClient({
+    //   password: process.env.REDIS_PASSWORD,
+    //   socket: {
+    //     host: process.env.REDIS_SOCKET_HOST,
+    //     port: Number(process.env.REDIS_SOCKET_PORT)
+    //   }
+    // });
+    // await client.connect();
 
 
-    console.log("Connected to Redis.");
+    // console.log("Connected to Redis.");
   } catch (error) {
     console.log("Mongoose Database Error");
     console.log(error);

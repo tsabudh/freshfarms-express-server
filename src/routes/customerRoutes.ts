@@ -16,7 +16,7 @@ router
     authController.checkClearance,
     validateCustomerDetails(false),
     checkValidationErrors,
-    cleanCache,
+
     customerController.addCustomer
   );
 
@@ -27,12 +27,12 @@ router
     authController.checkClearance,
     validateCustomerDetails(true),
     checkValidationErrors,
-    cleanCache,
+
     customerController.updateCustomer
   )
   .delete(
     authController.checkClearance,
-    cleanCache,
+
     customerController.deleteCustomer
   );
 

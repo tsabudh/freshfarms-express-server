@@ -28,7 +28,6 @@ app.use("/api/v1/products", productRouter);
 app.use("/api/v1/transactions", transactionRouter);
 app.use("/api/v1/customers", customerRouter);
 app.use("/api/v1/contracts", contractRouter);
-app.use("/api/v1/redis", redisRouter);
 
 app.all("*", (req: Request, res: Response, next: NextFunction) => {
   res.json({

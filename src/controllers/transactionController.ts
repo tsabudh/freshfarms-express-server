@@ -109,7 +109,7 @@ export const getAllTransactions = async (
       let filterParamsX = atob(req.query.filter as string);
       let filterParams: filterParams = JSON.parse(filterParamsX);
 
-      console.log(filterParamsX);
+      // console.log(filterParamsX);
       // console.log(req.query.filter);
       //* EXPERIMENTAL
       // let minN = `items.${filterParams?.totalQuantity?.from}`;

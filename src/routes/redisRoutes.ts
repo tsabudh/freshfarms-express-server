@@ -1,9 +1,9 @@
-import express from "express";
+// import express from "express";
 
-import { deleteCache } from "../controllers/cacheController";
+// import { deleteCache } from "../controllers/cacheController";
 
-const router = express.Router();
+// const router = express.Router();
 
-router.route("/").post(deleteCache);
+// router.route("/").post(deleteCache);
 
-export default router;
+// export default router;

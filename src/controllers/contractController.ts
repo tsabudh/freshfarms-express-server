@@ -67,7 +67,7 @@ export const confirmDeliveries = catchAsync(async (req: Request, res: Response, 
 
         if (alreadyDeliveredContracts.length >= 0) {
             console.log('Sending back response.')
-           return res.status(422).json({
+            return res.status(422).json({
                 status: "failure",
                 message: "confirmation required",
                 alreadyDeliveredContracts

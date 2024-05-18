@@ -43,7 +43,7 @@ export const getAllCustomers = async (
     if (name) filter.name = { $regex: nameExpression, $options: "i" };
     if (name) filter.phone = { $regex: phoneExpression };
 
-    let customers: DocumentQuery<any, any> = await Customer.find().cache();
+    let customers: DocumentQuery<any, any> = await Customer.find();
     // .limit(limit); //!.limit not found on query type
     // .sort({ name: 1 }); //!.sort not found on query type
 
