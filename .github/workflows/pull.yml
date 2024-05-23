@@ -1,0 +1,17 @@
+name: Auto Pull Main
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  pull:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Pull main branch
+        run: git pull origin main
