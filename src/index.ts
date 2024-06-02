@@ -7,12 +7,12 @@ import {server} from './webSocket';
 
 dotenv.config({ path: path.join(__dirname + "../../.env") });
 
-// const mongoDB: string = (process.env.DATABASE_STRING as string).replace(
-//   "<password>",
-//   process.env.DATABASE_PASSWORD as string
-// );
+const mongoDB: string = (process.env.DATABASE_STRING as string).replace(
+  "<password>",
+  process.env.DATABASE_PASSWORD as string
+);
 
-const mongoDB: string = "mongodb://127.0.0.1:27017/shree-krishna";
+// const mongoDB: string = "mongodb://127.0.0.1:27017/shree-krishna";
 // const redisURL: string = "redis://127.0.0.1:6379";
 
 
