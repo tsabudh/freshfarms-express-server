@@ -4,14 +4,17 @@ import express from "express";
 
 import bodyParser from "body-parser";
 import cors from "cors";
-
+import WebSocket from "ws";
+import http from "http";
 import transactionRouter from "./routes/transactionRoutes";
 import adminRouter from "./routes/adminRoutes";
 import productRouter from "./routes/productRoutes";
 import customerRouter from "./routes/customerRoutes";
 import contractRouter from "./routes/contractRoutes";
-import redisRouter from "./routes/redisRoutes";
+import messageRouter from "./routes/messageRoutes";
+
 import * as authController from "./controllers/authController";
+
 
 const app = express();
 
@@ -28,6 +31,7 @@ app.use("/api/v1/products", productRouter);
 app.use("/api/v1/transactions", transactionRouter);
 app.use("/api/v1/customers", customerRouter);
 app.use("/api/v1/contracts", contractRouter);
+app.use("/api/v1/messages", messageRouter);
 
 app.all("*", (req: Request, res: Response, next: NextFunction) => {
   res.json({
@@ -44,5 +48,9 @@ app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
     error: error
   })
 })
+
+
+
+
 
 export default app;
