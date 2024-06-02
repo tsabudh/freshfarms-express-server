@@ -24,6 +24,7 @@ interface ITransaction {
     productName: string;
     productId: mongoose.Schema.Types.ObjectId;
     quantity: number;
+    code:string;
   }>;
   cost: number;
   paidInFull: boolean;
@@ -64,6 +65,7 @@ const transactionSchema = new mongoose.Schema<ITransaction>(
           ref: "Product",
         },
         quantity: { type: Number, default: 1 },
+        code: { type: String }
       },
     ],
     paidInFull: { type: Boolean, default: true },
@@ -156,8 +158,7 @@ transactionSchema.pre("save", async function (next) {
 transactionSchema.pre("save", async function (next) {
   if (this.type != "purchase") return next();
 
-  let products = await Product.find().select("name _id price");
-  console.log(products);
+  let products = await Product.find().select("name _id price code");
   this.items.forEach((item) => {
     if (item.productId) {
       let productById = products.find((product) => {
@@ -169,6 +170,7 @@ transactionSchema.pre("save", async function (next) {
       // let productById = await Product.findById(item.productId);
       item.productName = productById.name;
       item.priceThen = productById.price;
+      item.code = productById.code;
     } else if (item.productName) {
       let productByName = products.find((product) => {
         if (item.productName && product.name == item.productName)
@@ -181,6 +183,7 @@ transactionSchema.pre("save", async function (next) {
       // item.productId = productByName._id.toString();
       item.productName = productByName.name;
       item.priceThen = productByName.price;
+      item.code = productByName.code;
     } else throw new Error("provide product name or id");
   });
   next();
