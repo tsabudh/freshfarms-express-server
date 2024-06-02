@@ -28,8 +28,9 @@ export const signupAdmin = async (
     // console.log(payload);
 
     // token = jwt.sign(payload, (process.env.JWT_SECRET_KEY as string));
-
-    const secret = fs.readFileSync('../../certs/private.pem');
+    
+    const secret = fs.readFileSync('/certs/private.pem');
+    // const secret = fs.readFileSync('../../certs/private.pem');
     let token = jwt.sign(payload, secret, { expiresIn: '60min', algorithm: 'RS256' });
 
 
@@ -165,3 +166,22 @@ export const updateMe = async (req: Request,
   }
 
 }
+export const getAllAdmins = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const result = await Admin.find();
+    res.json({
+      status: "success",
+      data: result,
+    });
+  } catch (error: any) {
+    console.log(error);
+    res.json({
+      status: "failure",
+      message: error.message,
+    });
+  }
+};
