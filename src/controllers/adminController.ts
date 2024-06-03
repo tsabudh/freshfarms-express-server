@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import multer from "multer";
 import sharp from "sharp";
 import fs from 'fs';
-
+import path from 'path';
 
 import * as jwt from "jsonwebtoken";
 import Admin from "../models/Admin";
@@ -27,10 +27,11 @@ export const signupAdmin = async (
 
     // console.log(payload);
 
-    // token = jwt.sign(payload, (process.env.JWT_SECRET_KEY as string));
-    
-    const secret = fs.readFileSync('/certs/private.pem');
-    // const secret = fs.readFileSync('../../certs/private.pem');
+    // token = jwt.sign(payload, (process.env.JWT_SECRET_KEY as string);
+
+    // const secret = fs.readFileSync('/certs/private.pem');
+    const secretPath = path.join(__dirname, '../../certs/private.pem');
+    const secret = fs.readFileSync(secretPath);
     let token = jwt.sign(payload, secret, { expiresIn: '60min', algorithm: 'RS256' });
 
 
