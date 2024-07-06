@@ -1,4 +1,4 @@
-import http from 'http';
+import https from 'http';
 import * as WebSocket from 'ws';
 
 import Message from './models/Message';
@@ -7,7 +7,7 @@ import { Mongoose } from 'mongoose';
 
 
 
-const server = http.createServer(app);
+const server = https.createServer(app);
 const websocketServer = new WebSocket.Server({ server });
 
 
@@ -66,8 +66,8 @@ websocketServer.on("connection", (ws) => {
         const sendAcknowledgmentToClient = function () {
             const ackMessage = {
                 type: "ack",
-                sender: data.recipient,
-                recipient: data.sender,
+                sender: data.sender,
+                recipient: data.recipient,
                 message: data.message,
                 messageId: data.messageId
             };
