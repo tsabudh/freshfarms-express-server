@@ -17,7 +17,6 @@ export const markTodaysDelivery = catchAsync(async (req: Request, res: Response,
     const commencedDate = res.locals.commencedDate;
     const toUpdate = res.locals.toUpdate;
 
-    console.log('   STILL UPDATING');
 
     let results = await Contract.updateMany(
         {
@@ -41,9 +40,7 @@ export const confirmDeliveries = catchAsync(async (req: Request, res: Response, 
     const confirmationStatus = details.confirmed;
     let commencedDate;
 
-    // console.log(date);
-    // if(details.confirmed == true) next();
-
+  
     if (!date) {
         commencedDate = Date.now();
     } else {
@@ -54,7 +51,6 @@ export const confirmDeliveries = catchAsync(async (req: Request, res: Response, 
     }
 
     if (!confirmationStatus) {
-        console.log('Confirmation status not provided.')
         let alreadyDeliveredContracts = await Contract.find({
             commencedDate: {
                 $gte: new Date().toDateString(),
@@ -66,7 +62,6 @@ export const confirmDeliveries = catchAsync(async (req: Request, res: Response, 
         }
 
         if (alreadyDeliveredContracts.length >= 0) {
-            console.log('Sending back response.')
             return res.status(422).json({
                 status: "failure",
                 message: "confirmation required",

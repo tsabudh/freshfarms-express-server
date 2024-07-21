@@ -11,7 +11,6 @@ export const getMyMessages = async (req: Request, res: Response, next: NextFunct
     try {
         let adminId = res.locals.currentUser;
        
-        console.log(adminId);
         let messages = await Message.find({
             $or: [
                 { sender: adminId },

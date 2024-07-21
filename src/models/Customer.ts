@@ -1,10 +1,19 @@
 import mongoose from "mongoose";
+import bcrypt from "bcrypt";
 
 let customerSchema = new mongoose.Schema({
   name: { type: String, lowercase: true, required: true },
+  username: { type: String, unique: true, required: true, lowercase: true },
+  password: { type: String, required: true, select: false },
   address: { type: String, lowercase: true },
   phone: [{ type: String, maxLength: 10, minlength: 10, unique: true }],
-
+  profilePicture: { type: String, default: 'default-admin-profile-picture.webp', required: false },
+  role: {
+    type: String,
+    required: true,
+    default: 'customer',
+    immutable: true // This makes the 'type' field immutable
+  },
   // Location information (optional)
   location: {
     type: {
@@ -61,13 +70,17 @@ customerSchema.pre("save", async function (next) {
   }
 });
 
-//- Attaching timestamp to path 'updatedAt'
-customerSchema.pre("save", async function (next) {
 
 
-})
+customerSchema.pre("save", function (next) {
 
+  if (!this.isModified("password")) return next();
 
+  const salt = bcrypt.genSaltSync(10);
+  const hashedPassword = bcrypt.hashSync(this.password, salt);
+  this.password = hashedPassword;
+  next();
+});
 
 
 let Customer = mongoose.model("Customer", customerSchema);

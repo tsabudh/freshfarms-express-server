@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const productSchema = new mongoose.Schema({
   name: { type: String, lowercase: true, required: true, unique: true },
-  unit: { type: String, enum: ['kg', 'scoop', 'litre'], required: true },
+  unit: { type: String, enum: ['kg', 'scoop', 'litre','count'], required: true },
   code: { type: String, lowercase: true, required: true, maxLength: 3 },
   price: { type: Number, required: true },
 

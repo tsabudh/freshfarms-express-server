@@ -24,7 +24,7 @@ interface ITransaction {
     productName: string;
     productId: mongoose.Schema.Types.ObjectId;
     quantity: number;
-    code:string;
+    code: string;
   }>;
   cost: number;
   paidInFull: boolean;
@@ -44,7 +44,6 @@ const transactionSchema = new mongoose.Schema<ITransaction>(
         customerId: { type: mongoose.Types.ObjectId, ref: "Customer" },
         name: {
           type: String,
-          default: "Unknown Customer",
           lowercase: true,
           trim: true,
           maxLength: 50,
@@ -65,23 +64,24 @@ const transactionSchema = new mongoose.Schema<ITransaction>(
           ref: "Product",
         },
         quantity: { type: Number, default: 1 },
-        code: { type: String }
+        code: { type: String },
       },
     ],
     paidInFull: { type: Boolean, default: true },
     contract: { type: Boolean, default: false },
     contractId: {
       type: mongoose.Schema.ObjectId,
-      ref: 'Contract',
+      ref: "Contract",
       required: [
         function () {
-          return this.contract === true
+          return this.contract === true;
         },
-        'Please provide a contract id for reference.']
+        "Please provide a contract id for reference.",
+      ],
     },
 
     paid: { type: Number },
-    createdBy: { type: mongoose.Types.ObjectId, ref: 'Admin', required: true }
+    createdBy: { type: mongoose.Types.ObjectId, ref: "Admin", required: true },
   },
   {
     toObject: {
@@ -89,41 +89,41 @@ const transactionSchema = new mongoose.Schema<ITransaction>(
     },
     toJSON: {
       virtuals: true,
-    }, timestamps: true
+    },
+    timestamps: true,
   }
 );
 
 //- DATE CHECKING
 transactionSchema.pre("save", function (next) {
-  console.log(new Date());
   this.issuedTime = new Date();
   next();
 });
 
 //- CONTRACT CASES
 transactionSchema.pre("save", async function (next) {
-
   if (this.contract != true) next();
 
   let contract = await Contract.findById(this.contractId);
-  console.log('message', contract);
-  if (!contract) throw new AppError('Contract not found of given contract Id.', 400);
+  if (!contract)
+    throw new AppError("Contract not found of given contract Id.", 400);
 
   if (contract) {
-
-    this.items = contract.items.map(item => { return ({ quantity: item.quantity, productId: item.productId }) });
+    this.items = contract.items.map((item) => {
+      return { quantity: item.quantity, productId: item.productId };
+    });
     this.paid = 0;
     contract.commencedDate.push(Date.now());
     await contract.save();
   }
-});
 
+  next();
+});
 
 //- VIRTUAL PATH COST IMPLEMENTATION
 transactionSchema.virtual("cost").get(function () {
   if (this.type != "purchase") return 0;
   let totalCost = 0;
-  // console.log(this);
   this.items.forEach((item) => {
     totalCost += item.priceThen * item.quantity || 0;
   });
@@ -140,14 +140,13 @@ transactionSchema.pre("save", async function (next) {
   if (this.type == "payment") {
     this.items = [];
 
-    console.log(typeof this.paid);
-    // Refuse to make payment of 0 
+    // Refuse to make payment of 0
     if (this.paid <= 0) {
-      throw new AppError('Payment cannot be zero or negative.', 400)
+      throw new AppError("Payment cannot be zero or negative.", 400);
     }
     // Refuse to make payment of float
     if (this.paid % 1 != 0) {
-      throw new AppError('Payment cannot be a decimal number', 400)
+      throw new AppError("Payment cannot be a decimal number", 400);
     }
 
     return next();
@@ -191,13 +190,28 @@ transactionSchema.pre("save", async function (next) {
 
 //- assigning customer name from given customer reference _id
 transactionSchema.pre("save", async function (next) {
+
+
   if (this.customer.customerId) {
     let customer = await Customer.findById(this.customer.customerId);
+
     if (customer) {
       this.customer.name = customer.name;
+      next();
     } else {
       next(new Error("Customer not found with that ID"));
     }
+  } else if (this.customer.name) {
+
+    let customers = await Customer.find({ name: this.customer.name });
+    if (!Array.isArray(customers))
+      throw new AppError("Something went wrong!", 500);
+    if (customers.length > 1)
+      throw new AppError("More than one customer matches given name.", 400);
+    if (customers.length == 0)
+      throw new AppError("No customer matches given name.", 400);
+  } else {
+    this.customer.name = "unknown"
   }
 });
 
@@ -205,9 +219,22 @@ transactionSchema.pre("save", async function (next) {
 transactionSchema.pre("save", async function (next) {
   if (this.type != "purchase") return next();
 
-  console.log(this.issuedTime);
   if (this.items.length == 0) throw new Error(`Items can't be empty`);
   next();
+});
+
+//- SETTING PAID AMOUNT IF PAID IN FULL & NOT A CONTRACT
+transactionSchema.pre("save", async function (next) {
+  try {
+    //- IF IT IS A PURCHASE, & IS PAID IN FULL
+    if (this.type == "purchase" && this.paidInFull && this.contract == false) {
+      this.paid = this.cost;
+    }
+    next();
+  } catch (error: any) {
+    console.log(error);
+    next(error);
+  }
 });
 
 //- ADDING TRANSACTION COST TO CUSTOMER ACCOUNT TAB
@@ -216,19 +243,12 @@ transactionSchema.pre("save", async function (next) {
     if (this.customer.customerId) {
       let customer = await Customer.findById(this.customer.customerId);
       if (customer) {
-        console.log("Registered customer found, Adding to customer's tab.");
-
         //- ADDING TRANSACTION TO PURCHASE
         customer.tab.purchase = this.cost + customer.tab.purchase;
 
-        //- IF IT IS A PURCHASE, CHECK IF PURCHASE IS PAID IN FULL
-        if (this.type == "purchase" && this.paidInFull) {
-          customer.tab.paid = customer.tab.paid + this.cost;
-          this.paid = this.cost;
-        } else {
-          // add to tab.paid even if transaction type is not 'purchase'
-          customer.tab.paid = customer.tab.paid + this.paid;
-        }
+        // add to tab.paid even if transaction type is not 'purchase'
+        customer.tab.paid = customer.tab.paid + this.paid;
+
         await customer.save();
       }
     }

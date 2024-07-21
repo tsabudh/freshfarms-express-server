@@ -1,7 +1,6 @@
 import { S3 } from 'aws-sdk';
 import dotenv from 'dotenv';
 dotenv.config({ path: '.env' })
-// import AWS from 'aws-sdk';
 
 // Set your AWS credentials
 // AWS.config.update({
@@ -29,7 +28,6 @@ export const s3uploadV3 = async (file: any,userRole) => {
 
     try {
         await parallelUploads3.done();
-        console.log("Upload successful");
     } catch (err) {
         console.error("Error", err);
     }

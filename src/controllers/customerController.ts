@@ -1,5 +1,6 @@
 import express from "express";
 import Customer from "../models/Customer";
+import { getMyDetails } from '../controllers/controllerFactory';
 
 import mongoose, { DocumentQuery } from "mongoose";
 
@@ -79,6 +80,11 @@ export const getCustomer = async (
   }
 };
 
+
+
+
+
+
 export const updateCustomer = async (
   req: express.Request,
   res: express.Response,
@@ -86,9 +92,12 @@ export const updateCustomer = async (
 ) => {
   const customerId = req.params.id;
 
+ 
   const newDetails = req.body;
 
   try {
+    
+   
     const updatedCustomer = await Customer.findByIdAndUpdate(
       customerId,
       newDetails,
@@ -96,6 +105,8 @@ export const updateCustomer = async (
         returnDocument: "after",
       }
     );
+
+    if (!updateCustomer) throw new Error('Customer update failed')
     res.send({
       status: "success",
       data: updatedCustomer,
@@ -126,6 +137,47 @@ export const deleteCustomer = async (
   } catch (error: any) {
     res.send({
       status: "failure",
+      message: error.message,
+    });
+  }
+};
+
+
+export const getMyDetailsAsCustomer = getMyDetails(Customer);
+
+export const updateMyDetails = async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
+  try {
+    const customerId = res.locals.currentUser;
+    const newDetails = req.body;
+
+   
+    const updatedCustomer = await Customer.findByIdAndUpdate(
+      customerId,
+      newDetails,
+      {
+        returnDocument: "after",
+      }
+    );
+
+    if (!updateCustomer) throw new Error('Customer update failed')
+    res.send({
+      status: "success",
+      data: updatedCustomer,
+    });
+  } catch (error: any) {
+    console.log(error);
+    const customer = await Customer.findById(customerId);
+
+    res.status(500).send({
+      status: "failure",
+      data: {
+        warning: "UPDATE FAILED",
+        customer: customer,
+      },
       message: error.message,
     });
   }

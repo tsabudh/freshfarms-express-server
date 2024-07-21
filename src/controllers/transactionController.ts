@@ -10,6 +10,7 @@ export const createTransaction = async (
   next: express.NextFunction
 ) => {
   try {
+
     const transactionDetails = req.body;
     transactionDetails.createdBy = res.locals.currentUser;
     const newTransaction = await Transaction.create(transactionDetails);
@@ -33,10 +34,16 @@ export const getAllTransactions = async (
   res: express.Response,
   next: express.NextFunction
 ) => {
+
+
+
   try {
     const limit = req.query.limit;
 
+
+
     const aggregationPipeline: PipelineStage[] = [
+
       {
         $addFields: {
           totalQuantity: {
@@ -67,6 +74,14 @@ export const getAllTransactions = async (
         },
       },
     ];
+
+    if (res.locals.userRole === 'customer') {
+
+
+      aggregationPipeline.push({
+        $match: { "customer.customerId": new mongoose.Types.ObjectId(res.locals.currentUser) },
+      })
+    }
 
     interface filterParams {
       itemsVariety?: {
@@ -109,22 +124,6 @@ export const getAllTransactions = async (
       let filterParamsX = atob(req.query.filter as string);
       let filterParams: filterParams = JSON.parse(filterParamsX);
 
-      // console.log(filterParamsX);
-      // console.log(req.query.filter);
-      //* EXPERIMENTAL
-      // let minN = `items.${filterParams?.totalQuantity?.from}`;
-      // let maxN = `items.${filterParams?.totalQuantity?.to}`;
-
-      // filterParams.totalQuantity &&
-      //   aggregationPipeline.push({
-      //     $match: {
-      //       $and: [
-      //         { [minN]: { $exists: true } },
-      //         { [maxN]: { $exists: false } },
-      //       ],
-      //     },
-      //   });
-      // * --------------------------
 
       filterParams?.itemsVariety &&
         aggregationPipeline.push({
@@ -184,21 +183,26 @@ export const getAllTransactions = async (
             },
           },
         });
-      filterParams.customerArray &&
-        aggregationPipeline.push({
-          $match: { "customer.name": { $in: filterParams.customerArray } },
-        });
 
-      //todo TEST CUSTOMER ID ARRAY, CHECK MONGOOSE OBJECTID TO STRING CASTING
-      filterParams.customerIdArray &&
-        aggregationPipeline.push({
-          $match: {
-            "customer.customerId": {
-              $in: filterParams.customerIdArray,
+
+      //- Check for customer filters if the user is admin
+      if (res.locals.userRole != 'customer') {
+
+        filterParams.customerArray &&
+          aggregationPipeline.push({
+            $match: { "customer.name": { $in: filterParams.customerArray } },
+          });
+
+        filterParams.customerIdArray &&
+          aggregationPipeline.push({
+            $match: {
+              "customer.customerId": {
+                $in: filterParams.customerIdArray,
+              },
             },
-          },
-        });
-      // console.log(filterParams.sort.byDate);
+          });
+      }
+
       if (filterParams.sortBy) {
         let sortBy: filterParams["sortBy"] = {};
 
@@ -231,20 +235,6 @@ export const getAllTransactions = async (
         });
     }
 
-    //- Populating createBy field with admin's name & _id
-    // aggregationPipeline.push({
-    //   $lookup: {
-    //     from: "admins",
-    //     localField: "createdBy",
-    //     foreignField: "_id",
-    //     pipeline: [{ $project: { name: 1 } }],
-    //     as: "issuedBy",
-    //   },
-    // })
-    // aggregationPipeline.push({
-    //   $unwind: "$issuedBy"
-    // });
-
 
 
     const mongooseQuery = Transaction.aggregate([...aggregationPipeline]);
@@ -257,7 +247,7 @@ export const getAllTransactions = async (
     });
   } catch (error: any) {
     console.log(error);
-    console.log(error.message);
+    console.info(error.message);
     res.send({
       status: "failure",
       message: error.message,

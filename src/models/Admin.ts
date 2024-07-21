@@ -1,10 +1,5 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
-import dotenv from 'dotenv';
-
-// dotenv.config({ path: '.env' })
-
-// console.log(process.env.AWS_ACCESS_KEY)
 
 
 const adminSchema = new mongoose.Schema({
@@ -15,6 +10,12 @@ const adminSchema = new mongoose.Schema({
   profilePicture: { type: String, default: 'default-admin-profile-picture.webp', required: false },
   createdAt: { type: Date, default: Date.now() },
   username: { type: String, unique: true, required: true, lowercase: true },
+  role: {
+    type: String,
+    required: true,
+    default: 'admin',
+    immutable: true // This makes the 'type' field immutable
+  },
 });
 
 

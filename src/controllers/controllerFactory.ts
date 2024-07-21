@@ -95,3 +95,34 @@ export const getAll = (Model: Model<Schema>) =>
     });
   });
 
+
+export const getMyDetails = (Model: Model<Schema>) => catchAsync(
+
+
+  async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+
+    try {
+      let userId = res.locals.currentUser;
+      const userRole = res.locals.userRole;
+
+
+
+      let myDetails = await Model.findById(userId);
+      res.status(200).json({
+        status: "success",
+        data: myDetails,
+      });
+    } catch (error: any) {
+      res.status(400).json({
+        status: 'failure',
+        message: error.message
+      })
+    }
+
+  }
+
+)

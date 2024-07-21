@@ -6,7 +6,9 @@ import path from 'path';
 
 import * as jwt from "jsonwebtoken";
 import Admin from "../models/Admin";
-import { s3uploadV2 } from "../utils/s3Service";
+import { s3uploadV2, s3uploadV3 } from "../utils/s3Service";
+import { getMyDetails } from "./controllerFactory";
+import { signJWT } from "../utils/jwtUtils";
 
 export const signupAdmin = async (
   req: Request,
@@ -19,21 +21,12 @@ export const signupAdmin = async (
 
     newAdmin = await newAdmin.save();
     //- setting up currentUser for logging in admin after successful signup
-    // res.locals.currentUser = newAdmin._id;
     const payload = {
       currentUser: newAdmin._id,
       issuedAt: Date.now(),
     };
 
-    // console.log(payload);
-
-    // token = jwt.sign(payload, (process.env.JWT_SECRET_KEY as string);
-
-    // const secret = fs.readFileSync('/certs/private.pem');
-    const secretPath = path.join(__dirname, '../../certs/private.pem');
-    const secret = fs.readFileSync(secretPath);
-    let token = jwt.sign(payload, secret, { expiresIn: '60min', algorithm: 'RS256' });
-
+    const token = signJWT(payload);
 
     res.send({
       status: "success",
@@ -47,29 +40,7 @@ export const signupAdmin = async (
     });
   }
 };
-
-export const getMyDetails = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-
-  try {
-    let adminId = res.locals.currentUser;
-    console.log(adminId);
-    let myDetails = await Admin.findById(adminId);
-    res.status(200).json({
-      status: "success",
-      data: myDetails,
-    });
-  } catch (error: any) {
-    res.status(400).json({
-      status: 'failure',
-      message: error.message
-    })
-  }
-
-};
+export const getMyDetailsAsAdmin = getMyDetails(Admin);
 
 
 
@@ -88,10 +59,10 @@ export const uploadPhotoToS3 = async (
 ) => {
   try {
 
-    console.log(req.file);
     let file = req.file;
 
-    let result = await s3uploadV2(file);
+    // let result = await s3uploadV2(file);
+    let result = await s3uploadV3(file, 'admin');
 
     res.json({
       status: "success",
@@ -120,7 +91,6 @@ export const resizeImage = async (
     req.file.mimetype = 'image/webp';
     req.file.originalname = `${res.locals.currentUser}-profile-picture.webp`;
 
-    console.log(req.file);
 
     //- Change quality and format and attach it as req.file.buffer for s3UploadV2 function
     req.file.buffer = await sharp(req.file.buffer)
