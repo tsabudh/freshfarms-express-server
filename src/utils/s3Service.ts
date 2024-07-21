@@ -10,6 +10,32 @@ dotenv.config({ path: '.env' })
 //   region: process.env.AWS_REGION, // Optional, specify your AWS region
 // });
 
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { Upload } from "@aws-sdk/lib-storage";
+
+export const s3uploadV3 = async (file: any,userRole) => {
+    const s3 = new S3Client({ region: process.env.AWS_REGION });
+
+    const params = {
+        Bucket: process.env.AWS_BUCKET_NAME,
+        Key: `${userRole}s/profilePicture/${file.originalname}`,
+        Body: file.buffer,
+    };
+
+    const parallelUploads3 = new Upload({
+        client: s3,
+        params: params,
+    });
+
+    try {
+        await parallelUploads3.done();
+        console.log("Upload successful");
+    } catch (err) {
+        console.error("Error", err);
+    }
+};
+
+
 export const s3uploadV2 = async (file: any) => {
     const s3 = new S3();
 
