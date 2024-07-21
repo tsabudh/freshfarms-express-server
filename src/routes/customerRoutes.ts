@@ -1,39 +1,57 @@
-import express from "express";
+import express, { response } from "express";
 
-import cleanCache from "../middlewares/cleanCache";
 const router = express.Router();
 
-import * as productController from "../controllers/productController";
 
 import * as customerController from "../controllers/customerController";
 import * as authController from "../controllers/authController";
 import { validateCustomerDetails } from "../Validations/customerValidator";
 import { checkValidationErrors } from '../Validations/checkValidationErrors';
+
 router
-  .route("/")
-  .get(authController.checkClearance, customerController.getAllCustomers)
+  .route("/login")
+  .post(authController.validateCustomerAccount, authController.loginAccount);
+
+
+//- Only access following endpoints authenticated (logged in users)
+router.use(authController.checkAuthentication);
+
+router.route("/refreshToken").get(authController.refreshJWTToken);
+
+router.route("/getMyDetails").get(customerController.getMyDetailsAsCustomer)
+router.route("/updateMyDetails").patch(
+  validateCustomerDetails(true),
+  checkValidationErrors,
+  customerController.updateMyDetails
+)
+
+//- Restrict following endpoints to admin user only
+router.use(authController.restrictTo('admin'));
+
+router
+  .route("/all")
+  .get(customerController.getAllCustomers)
   .post(
-    authController.checkClearance,
     validateCustomerDetails(false),
     checkValidationErrors,
-
     customerController.addCustomer
   );
 
+
+
 router
-  .route("/:id")
-  .get(authController.checkClearance, customerController.getCustomer)
+  .route("/one/:id")
+  .get(customerController.getCustomer)
   .patch(
-    authController.checkClearance,
     validateCustomerDetails(true),
     checkValidationErrors,
-
     customerController.updateCustomer
   )
   .delete(
-    authController.checkClearance,
-
     customerController.deleteCustomer
   );
+
+
+
 
 export default router;

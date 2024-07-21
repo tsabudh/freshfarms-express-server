@@ -5,15 +5,28 @@ import * as authController from "../controllers/authController";
 
 const router = express.Router();
 
+
+
 router
-  .route("/")
-  .get(authController.checkClearance, productController.getAllProducts)
-  .post(authController.checkClearance, productController.addProduct)
-  .patch(authController.checkClearance, productController.updateManyProducts);
+.route("/")
+.get(productController.getAllProducts);
+
+router
+.route("/:id")
+.get(productController.getProduct)
+
+//- Only access following endpoints authenticated (logged in users)
+router.use(authController.checkAuthentication);
+
+//- Restrict following endpoints to admin user only
+router.use(authController.restrictTo('admin'));
+
+router.route("/")
+  .post(productController.addProduct)
+  .patch(productController.updateManyProducts);
 
 router
   .route("/:id")
-  .get(authController.checkClearance, productController.getProduct)
-  .patch(authController.checkClearance, productController.updateProduct);
+  .patch(productController.updateProduct);
 
 export default router;
