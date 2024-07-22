@@ -38,8 +38,7 @@ router
   );
 
 
-
-router
+  router
   .route("/one/:id")
   .get(customerController.getCustomer)
   .patch(

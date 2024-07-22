@@ -104,7 +104,7 @@ export const loginAccount = async (
   }
 };
 
-export const checkAuthentication = (
+export const checkAuthentication = async (
   req: express.Request,
   res: express.Response,
   next: express.NextFunction
@@ -130,6 +130,17 @@ export const checkAuthentication = (
       const currentUser = (returnedObject as JwtPayload).currentUser;
       const userRole = (returnedObject as JwtPayload).userRole;
 
+      let user;
+      if (userRole == 'admin') {
+        user = await Admin.findById(currentUser)
+      } else if (userRole == 'customer') {
+        user = await Customer.findById(currentUser)
+      }
+
+      if (!user) {
+        console.log(`${userRole} not found`)
+        throw new AppError(`${userRole.replace(/\b\w/g, (char) => char.toUpperCase())} of given id does not exists!`, 404)
+      }
       res.locals.currentUser = currentUser;
       res.locals.userRole = userRole;
       next();
@@ -142,7 +153,7 @@ export const checkAuthentication = (
   } catch (error: any) {
 
     console.error(error);
-    return next(new AppError(error.message, 500))
+    return next(error); 
   }
 
 };
