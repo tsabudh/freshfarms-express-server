@@ -3,6 +3,7 @@ import { Request, Response, NextFunction } from "express";
 import express from "express";
 
 import bodyParser from "body-parser";
+import cookieParser from "cookie-parser";
 import cors from "cors";
 import WebSocket from "ws";
 import http from "http";
@@ -12,6 +13,7 @@ import productRouter from "./routes/productRoutes";
 import customerRouter from "./routes/customerRoutes";
 import contractRouter from "./routes/contractRoutes";
 import messageRouter from "./routes/messageRoutes";
+import oAuthRouter from "./routes/oauthRoutes";
 
 import * as authController from "./controllers/authController";
 import AppError from "./utils/appError";
@@ -19,7 +21,12 @@ import AppError from "./utils/appError";
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:5173', 
+  credentials: true              
+}));
+
+app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(express.static('public'));
 
@@ -32,6 +39,7 @@ app.use("/api/v1/products", productRouter);
 app.use("/api/v1/transactions", transactionRouter);
 app.use("/api/v1/contracts", contractRouter);
 app.use("/api/v1/messages", messageRouter);
+app.use("/api/auth/", oAuthRouter);
 
 app.all("*", (req: Request, res: Response, next: NextFunction) => {
   res.status(400).json({
