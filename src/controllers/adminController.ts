@@ -1,19 +1,15 @@
 import { Request, Response, NextFunction } from "express";
 import multer from "multer";
 import sharp from "sharp";
-import fs from 'fs';
-import path from 'path';
-
-import * as jwt from "jsonwebtoken";
 import Admin from "../models/Admin";
-import { s3uploadV2, s3uploadV3 } from "../utils/s3Service";
+import {  s3uploadV3 } from "../utils/s3Service";
 import { getMyDetails } from "./controllerFactory";
 import { signJWT } from "../utils/jwtUtils";
 
 export const signupAdmin = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ) => {
   try {
     let adminDetails = req.body;
@@ -60,6 +56,8 @@ export const uploadPhotoToS3 = async (
   try {
 
     let file = req.file;
+    //- Return error if file is not provided
+    if (!file) return next(new Error('File not provided!'));
 
     // let result = await s3uploadV2(file);
     let result = await s3uploadV3(file, 'admin');
@@ -116,7 +114,7 @@ export const resizeImage = async (
 
 export const updateMe = async (req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ) => {
 
   try {
@@ -138,9 +136,9 @@ export const updateMe = async (req: Request,
 
 }
 export const getAllAdmins = async (
-  req: Request,
+  _req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ) => {
   try {
     const result = await Admin.find();

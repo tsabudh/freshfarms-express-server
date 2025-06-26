@@ -1,4 +1,3 @@
-import express from "express";
 import * as validator from "express-validator";
 
 export const validateCustomerDetails = (isUpdateRequest = false) => {
@@ -14,7 +13,7 @@ export const validateCustomerDetails = (isUpdateRequest = false) => {
   return [
     validator
       .body("name")
-      .if((value, { req }) => processIfUpdating(req, "name"))
+      .if((_value, { req }) => processIfUpdating(req, "name"))
       .notEmpty()
       .withMessage("Please provide a name.")
       .bail()
@@ -22,7 +21,7 @@ export const validateCustomerDetails = (isUpdateRequest = false) => {
       .withMessage("Please provide a valid name."),
     validator
       .body("phone")
-      .if((value, { req }) => processIfUpdating(req, "phone"))
+      .if((_value, { req }) => processIfUpdating(req, "phone"))
       .notEmpty()
       .withMessage("Please provide a phone number.")
       .bail()
@@ -30,7 +29,7 @@ export const validateCustomerDetails = (isUpdateRequest = false) => {
       .withMessage("Please provide a valid phone number of Nepal"),
     validator
       .body("address")
-      .if((value, { req }) => processIfUpdating(req, "address"))
+      .if((_value, { req }) => processIfUpdating(req, "address"))
       .notEmpty()
       .withMessage("Please provide an address.")
       .bail()

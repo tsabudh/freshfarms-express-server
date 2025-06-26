@@ -14,22 +14,22 @@ interface ITransaction {
   issuedTime: Date;
   type: TransactionType;
   contract: boolean;
-  contractId: mongoose.Schema.Types.ObjectId;
+  contractId: mongoose.Types.ObjectId;
   customer: {
-    customerId?: mongoose.Schema.Types.ObjectId;
+    customerId?: mongoose.Types.ObjectId;
     name?: string;
   };
   items: Array<{
     priceThen: number;
     productName: string;
-    productId: mongoose.Schema.Types.ObjectId;
+    productId: mongoose.Types.ObjectId;
     quantity: number;
     code: string;
   }>;
   cost: number;
   paidInFull: boolean;
   paid: number;
-  createdBy: mongoose.Schema.Types.ObjectId;
+  createdBy: mongoose.Types.ObjectId;
 }
 const transactionSchema = new mongoose.Schema<ITransaction>(
   {
@@ -81,7 +81,11 @@ const transactionSchema = new mongoose.Schema<ITransaction>(
     },
 
     paid: { type: Number },
-    createdBy: { type: mongoose.Types.ObjectId, ref: "Admin", required: true },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Admin",
+      required: true,
+    },
   },
   {
     toObject: {
@@ -109,11 +113,22 @@ transactionSchema.pre("save", async function (next) {
     throw new AppError("Contract not found of given contract Id.", 400);
 
   if (contract) {
-    this.items = contract.items.map((item) => {
-      return { quantity: item.quantity, productId: item.productId };
-    });
+    this.items = await Promise.all(
+      contract.items.map(async (item) => {
+        const product = await Product.findById(item.productId);
+        if (!product) throw new AppError("Product not found", 400);
+
+        return {
+          quantity: item.quantity,
+          productId: item.productId,
+          priceThen: item.price,
+          productName: product.name,
+          code: product.code,
+        };
+      })
+    );
     this.paid = 0;
-    contract.commencedDate.push(Date.now());
+    contract.commencedDate.push(new Date());
     await contract.save();
   }
 
@@ -131,8 +146,8 @@ transactionSchema.virtual("cost").get(function () {
 });
 
 //- customer object validation
-transactionSchema.path("customer").validate(function (value) {
-  if (this.customer.customerId || this.customer.name) return true;
+transactionSchema.path("customer").validate(function () {
+  return !!(this.customer.customerId || this.customer.name);
 });
 
 //- CHECK TRANSACTION TYPE
@@ -171,9 +186,11 @@ transactionSchema.pre("save", async function (next) {
       item.priceThen = productById.price;
       item.code = productById.code;
     } else if (item.productName) {
-      let productByName = products.find((product) => {
-        if (item.productName && product.name == item.productName)
-          return item.productName.trim().toLocaleLowerCase();
+      let productByName = products.find((product) =>{
+        return item.productName
+          ? product.name.toLocaleLowerCase() ===
+            item.productName.trim().toLocaleLowerCase()
+          : false
       });
       if (!productByName)
         throw new Error(`Product with name "${item.productName}" not found.`);
@@ -190,8 +207,6 @@ transactionSchema.pre("save", async function (next) {
 
 //- assigning customer name from given customer reference _id
 transactionSchema.pre("save", async function (next) {
-
-
   if (this.customer.customerId) {
     let customer = await Customer.findById(this.customer.customerId);
 
@@ -202,7 +217,6 @@ transactionSchema.pre("save", async function (next) {
       next(new Error("Customer not found with that ID"));
     }
   } else if (this.customer.name) {
-
     let customers = await Customer.find({ name: this.customer.name });
     if (!Array.isArray(customers))
       throw new AppError("Something went wrong!", 500);
@@ -211,7 +225,7 @@ transactionSchema.pre("save", async function (next) {
     if (customers.length == 0)
       throw new AppError("No customer matches given name.", 400);
   } else {
-    this.customer.name = "unknown"
+    this.customer.name = "unknown";
   }
 });
 
@@ -273,7 +287,7 @@ transactionSchema.pre("save", async function (next) {
 
     for (let item of this.items) {
       // Match product with the _id equating item's productId
-      let matchedProduct = products.find((product, index, array) => {
+      let matchedProduct = products.find((product) => {
         return product._id.toString() == item.productId.toString();
       });
 

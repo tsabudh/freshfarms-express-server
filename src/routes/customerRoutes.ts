@@ -1,7 +1,5 @@
-import express, { response } from "express";
-
+import express from "express";
 const router = express.Router();
-
 
 import * as customerController from "../controllers/customerController";
 import * as authController from "../controllers/authController";

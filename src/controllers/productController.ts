@@ -1,11 +1,10 @@
-import mongoose from "mongoose";
 import express from "express";
 import Product from "../models/Product";
 
 export const addProduct = async (
   req: express.Request,
   res: express.Response,
-  next: express.NextFunction
+  _next: express.NextFunction
 ) => {
   try {
     let newProduct = new Product(req.body);
@@ -23,16 +22,15 @@ export const addProduct = async (
 };
 
 export const updateManyProducts = async (
-  req: express.Request,
+  _req: express.Request,
   res: express.Response,
-  next: express.NextFunction
+  _next: express.NextFunction
 ) => {
   try {
-    const db = mongoose.connection.db;
 
     let results = await Product.find({}, { name: 1 });
 
-    results.forEach((doc, index, array) => {
+    results.forEach((doc) => {
       Product.findOneAndUpdate(
         { _id: doc.id },
         {
@@ -56,10 +54,10 @@ export const updateManyProducts = async (
 export const getProduct = async (
   req: express.Request,
   res: express.Response,
-  next: express.NextFunction
+  _next: express.NextFunction
 ) => {
   try {
-    const productId = req.params.id;
+    const productId = req.params['id'];
 
     const query = Product.findById(productId);
     const product = await query;
@@ -79,10 +77,10 @@ export const getProduct = async (
 export const updateProduct = async (
   req: express.Request,
   res: express.Response,
-  next: express.NextFunction
+  _next: express.NextFunction
 ) => {
   try {
-    const productId = req.params.id;
+    const productId = req.params['id'];
     const updateDetails = req.body;
     const query = Product.findByIdAndUpdate(productId, updateDetails, {
       new: true,
@@ -102,9 +100,9 @@ export const updateProduct = async (
 };
 
 export const getAllProducts = async (
-  req: express.Request,
+  _req: express.Request,
   res: express.Response,
-  next: express.NextFunction
+  _next: express.NextFunction
 ) => {
   try {
     const products = await Product.find();

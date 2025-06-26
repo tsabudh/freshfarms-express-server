@@ -1,15 +1,14 @@
-import { Request, Response, NextFunction } from "express";
-import multer from 'multer';
+import multer from "multer";
 
 const multerStorage = multer.diskStorage({
-    destination: (req, file, cb) => {
-      cb(null, 'src/localData');
-    },
-    filename: (req, file, cb) => {
-      cb(null, Date.now() + '-' + file.originalname);
-    },
-  });
+  destination: (_req, _file, cb) => {
+    cb(null, "src/localData");
+  },
+  filename: (_req, file, cb) => {
+    cb(null, Date.now() + "-" + file.originalname);
+  },
+});
 
-  const upload = multer({
-    storage: multerStorage,
-  });
+multer({
+  storage: multerStorage,
+});

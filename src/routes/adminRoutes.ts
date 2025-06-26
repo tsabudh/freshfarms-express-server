@@ -11,9 +11,7 @@ const router = express.Router();
 router
   .route("/login")
   .post(authController.validateAdminAccount, authController.loginAccount);
-
 router.route("/signup").post(validateAdminDetails(false), checkValidationErrors, adminController.signupAdmin);
-
 router.route("/refreshToken").get(authController.checkAuthentication, authController.refreshJWTToken);
 
 //- Check clearance at all routes except login or signup
@@ -25,11 +23,9 @@ router.route("/all").get(adminController.getAllAdmins);
 router.use(authController.restrictTo('admin'));
 
 router.route("/getMyDetails").get(adminController.getMyDetailsAsAdmin);
-
 router.route("/updateMe").patch(validateAdminDetails(true), checkValidationErrors, adminController.updateMe);
 router.route("/uploadProfilePicture")
   .post(adminController.uploadFile, adminController.resizeImage, adminController.uploadPhotoToS3);
-
 router.route("/logout").post(authController.logoutAccount);
 
 export default router;

@@ -1,7 +1,26 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 
-let customerSchema = new mongoose.Schema({
+export interface ICustomer extends mongoose.Document {
+  name: string;
+  username: string;
+  password: string;
+  address?: string;
+  phone: string[];
+  profilePicture?: string;
+  role: string; 
+  location?: {
+    type: string;
+    coordinates: number[];
+  };
+  tab: {
+    purchase: number;
+    paid: number;
+    due: number;
+  };
+}
+
+let customerSchema = new mongoose.Schema<ICustomer>({
   name: { type: String, lowercase: true, required: true },
   username: { type: String, unique: true, required: true, lowercase: true },
   password: { type: String, required: true, select: false },

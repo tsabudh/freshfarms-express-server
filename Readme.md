@@ -1,8 +1,8 @@
-# Shree Krishna Dairy - Digital Record-Keeping Tool's Server
+# Freshfarms - Server for freshfarm's digital logkeeping
 
 ## Overview
 
-Shree Krishna Dairy's digital record-keeping tool is designed to streamline the management of transactions, customer information, and product inventory for a local dairy shop. This tool simplifies the logging process and ensures accurate record maintenance.
+Freshfarms' digital record-keeping tool is designed to streamline the management of transactions, customer information, and product inventory for a local dairy shop. This tool simplifies the logging process and ensures accurate record maintenance.
 
 ## Project Structure
 
@@ -17,9 +17,9 @@ Shree Krishna Dairy's digital record-keeping tool is designed to streamline the 
 - **Inventory Management**: Track product inventory efficiently.
 
 ## API Documentation
-# Shree Krishna Dairy API Collection
+# Freshfarms API Collection
 
-This repository contains a Postman collection for the Shree Krishna Dairy API. The collection includes various API endpoints for managing customers, admins, products, and transactions.
+This repository contains a Postman collection for the Freshfarms API. The collection includes various API endpoints for managing customers, admins, products, and transactions.
 
 ## Collection Overview
 
