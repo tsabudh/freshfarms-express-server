@@ -1,8 +1,18 @@
-import mongoose from 'mongoose';
+import mongoose,{Document} from 'mongoose';
 import bcrypt from 'bcrypt';
 
 
-const adminSchema = new mongoose.Schema({
+export interface IAdmin extends Document {
+  name: string;
+  phone: string[];
+  password: string;
+  createdAt: Date;
+  username: string;
+  role: string;
+  profilePicture?: string | null;
+}
+
+const adminSchema = new mongoose.Schema<IAdmin>({
   name: { type: String, required: true },
   //   userName:{type:String, }
   phone: [{ type: String, required: true, unique: true }],

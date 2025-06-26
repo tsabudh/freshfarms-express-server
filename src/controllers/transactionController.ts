@@ -7,10 +7,9 @@ import catchAsync from "../utils/catchAsync";
 export const createTransaction = async (
   req: express.Request,
   res: express.Response,
-  next: express.NextFunction
+  _next: express.NextFunction
 ) => {
   try {
-
     const transactionDetails = req.body;
     transactionDetails.createdBy = res.locals.currentUser;
     const newTransaction = await Transaction.create(transactionDetails);
@@ -27,23 +26,14 @@ export const createTransaction = async (
   }
 };
 
-
-
 export const getAllTransactions = async (
   req: express.Request,
   res: express.Response,
-  next: express.NextFunction
+  _next: express.NextFunction
 ) => {
-
-
-
   try {
-    const limit = req.query.limit;
-
-
-
+    // const limit = req.query['limit'];
     const aggregationPipeline: PipelineStage[] = [
-
       {
         $addFields: {
           totalQuantity: {
@@ -75,12 +65,14 @@ export const getAllTransactions = async (
       },
     ];
 
-    if (res.locals.userRole === 'customer') {
-
-
+    if (res.locals.userRole === "customer") {
       aggregationPipeline.push({
-        $match: { "customer.customerId": new mongoose.Types.ObjectId(res.locals.currentUser) },
-      })
+        $match: {
+          "customer.customerId": new mongoose.Types.ObjectId(
+            res.locals.currentUser
+          ),
+        },
+      });
     }
 
     interface filterParams {
@@ -120,10 +112,14 @@ export const getAllTransactions = async (
       limit?: number;
     }
 
-    if (req.query.filter) {
-      let filterParamsX = atob(req.query.filter as string);
-      let filterParams: filterParams = JSON.parse(filterParamsX);
+    // Pagination and filtering
+    const page = parseInt(req.query["page"] as string) || 1;
+    const limit = parseInt(req.query["limit"] as string) || 10;
+    const skip = (page - 1) * limit;
 
+    if (req.query["filter"]) {
+      let filterParamsX = atob(req.query["filter"] as string);
+      let filterParams: filterParams = JSON.parse(filterParamsX);
 
       filterParams?.itemsVariety &&
         aggregationPipeline.push({
@@ -184,10 +180,8 @@ export const getAllTransactions = async (
           },
         });
 
-
       //- Check for customer filters if the user is admin
-      if (res.locals.userRole != 'customer') {
-
+      if (res.locals.userRole != "customer") {
         filterParams.customerArray &&
           aggregationPipeline.push({
             $match: { "customer.name": { $in: filterParams.customerArray } },
@@ -235,14 +229,31 @@ export const getAllTransactions = async (
         });
     }
 
+    // Count the total number of documents after filtering
+    const countPipeline = aggregationPipeline.filter(
+      (stage) => !("$skip" in stage || "$limit" in stage)
+    );
+    countPipeline.push({ $count: "totalDocs" });
 
+    // Limit and skip for pagination
+    aggregationPipeline.push({ $skip: skip });
+    aggregationPipeline.push({ $limit: limit });
 
-    const mongooseQuery = Transaction.aggregate([...aggregationPipeline]);
-    const results = await mongooseQuery;
+    // Run both in parallel
+    const [results, countResult] = await Promise.all([
+      Transaction.aggregate(aggregationPipeline),
+      Transaction.aggregate(countPipeline),
+    ]);
+
+    // Extract total documents count from the count result
+    const totalDocs = countResult[0]?.totalDocs || 0;
 
     res.send({
       status: "success",
       numberOfResults: results.length,
+      currentPage: page,
+      totalDocs,
+      totalPages: Math.ceil(totalDocs / limit),
       data: results,
     });
   } catch (error: any) {
@@ -255,11 +266,13 @@ export const getAllTransactions = async (
   }
 };
 
-export const createManyTransactionsOnContract = catchAsync(async (
-  req: express.Request,
-  res: express.Response,
-  next: express.NextFunction
-) => {
-  const contracts = req.body.contracts;
-
-})
+export const createManyTransactionsOnContract = catchAsync(
+  async (
+    _req: express.Request,
+    _res: express.Response,
+    _next: express.NextFunction
+  ) => {
+    // const contracts = req.body.contracts;
+    return;
+  }
+);

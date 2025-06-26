@@ -48,7 +48,7 @@ export const oAuthCallback = async (req: Request, res: Response) => {
 
 
 export const oAuthCheck = (req:Request, res:Response) => {
-  const token = req.cookies?.access_token;
+  const token = req.cookies['access_token'];
 
   if (!token) {
     return res.status(401).json({ message: "Unauthorized" });

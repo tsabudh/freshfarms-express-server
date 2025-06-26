@@ -12,7 +12,7 @@ export const validateAdminDetails = (isUpdateRequest = false) => {
 
     let nameValidator = validator
         .body("name")
-        .if((value, { req }) => processIfUpdating(req, "name"))
+        .if((_value, { req }) => processIfUpdating(req, "name"))
         .notEmpty()
         .withMessage("Please provide a name.")
         .bail()
@@ -21,7 +21,7 @@ export const validateAdminDetails = (isUpdateRequest = false) => {
 
     let phoneValidator = validator
         .body("phone")
-        .if((value, { req }) => processIfUpdating(req, "phone"))
+        .if((_value, { req }) => processIfUpdating(req, "phone"))
         .notEmpty()
         .withMessage("Please provide a phone number.")
         .bail()
@@ -30,7 +30,7 @@ export const validateAdminDetails = (isUpdateRequest = false) => {
 
     let usernameValidator = validator
         .body("username")
-        .if((value, { req }) => processIfUpdating(req, "username"))
+        .if((_value, { req }) => processIfUpdating(req, "username"))
         .notEmpty()
         .withMessage("Please provide a username.")
         .bail()

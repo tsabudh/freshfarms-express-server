@@ -1,21 +1,16 @@
 import mongoose from 'mongoose';
-
 import Product from './Product';
-import Customer from './Customer';
-import AppError from '../utils/appError';
 
-
-
-interface IContract {
-    customerId: mongoose.Schema.Types.ObjectId;
+interface IContract extends mongoose.Document {
+    customerId: mongoose.Types.ObjectId;
     items: Array<{
-        quantity: Number;
-        price: Number;
-        productId: mongoose.Schema.Types.ObjectId;
+        quantity: number;
+        price: number;
+        productId: mongoose.Types.ObjectId;
 
     }>;
-    interval: Number;
-    commencedDate: Array<{}>
+    interval: number;
+    commencedDate: Date[]
 }
 
 const contractSchema = new mongoose.Schema<IContract>({

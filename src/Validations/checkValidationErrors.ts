@@ -13,7 +13,7 @@ export const checkValidationErrors = (
       .status(400)
       .json({ status: "failure", errors: validationErrors.array() });
   } else {
-    next();
+    return next();
   }
 };
 

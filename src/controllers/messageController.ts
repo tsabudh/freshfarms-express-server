@@ -1,11 +1,10 @@
 import { Request, Response, NextFunction } from "express";
 
-import mongoose from 'mongoose';
 
 import Message from "../models/Message";
 
 
-export const getMyMessages = async (req: Request, res: Response, next: NextFunction) => {
+export const getMyMessages = async (_req: Request, res: Response, _next: NextFunction) => {
 
 
     try {

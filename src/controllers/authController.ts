@@ -1,11 +1,8 @@
-import mongoose from "mongoose";
 
 import express from "express";
 import bcrypt from "bcrypt";
-import jwt, { JwtPayload } from "jsonwebtoken";
-import fs from "fs";
 
-import { generateJWKS, verifyJWT } from "../utils/jwtUtils";
+import {  verifyJWT } from "../utils/jwtUtils";
 
 import Admin from "../models/Admin";
 import AppError from "../utils/appError";
@@ -67,9 +64,9 @@ export const validateCustomerAccount = async function (
 };
 
 export const loginAccount = async (
-  req: express.Request,
+  _req: express.Request,
   res: express.Response,
-  next: express.NextFunction
+  _next: express.NextFunction
 ) => {
   try {
     const payload = {
@@ -108,8 +105,9 @@ export const checkAuthentication = async (
   next: express.NextFunction
 ) => {
   try {
+    console.log("Checking authentication...");
     const bearerHeader = req.headers.authorization;
-    const cookieAccessToken = req.cookies?.access_token;
+    const cookieAccessToken = req.cookies['access_token'];
 
     // Extract token from Bearer header if present and valid
     let bearerToken = null;
@@ -132,20 +130,6 @@ export const checkAuthentication = async (
         ? cookieAccessToken
         : null;
 
-    // Logging for debugging
-
-    console.log("Bearer Header:", typeof bearerHeader, bearerHeader);
-    console.log(
-      "Cookie Access Token:",
-      typeof cookieAccessToken,
-      cookieAccessToken
-    );
-    console.log("jwtToken:", typeof jwtToken, jwtToken);
-
-    console.log("Bearer Header:");
-    console.table(bearerHeader);
-    console.log("Cookie Access Token:", cookieAccessToken);
-    console.log("JWT Token:", jwtToken ?? "No valid JWT token found");
 
     if (!jwtToken) {
       return res.status(401).json({
@@ -166,16 +150,16 @@ export const checkAuthentication = async (
       });
     }
 
+    console.log("Info on decoded token:", decoded);
     // Extract user info from decoded token
-    const currentUser = decoded.sub;
+    const currentUser = decoded.currentUser || decoded.sub;
     // const currentUser = decoded.currentUser;
     const userRole = decoded.userRole;
-    console.log("Info on decoded token:", decoded);
-
+    
     if (!currentUser || !userRole) {
       return res.status(401).json({
         status: "failure",
-        message: "Token missing required user info.",
+        message: "Token missing required user info!",
       });
     }
 
@@ -205,19 +189,23 @@ export const checkAuthentication = async (
     res.locals.currentUser = currentUser;
     res.locals.userRole = userRole;
 
-    next();
+    return next();
   } catch (error: any) {
     console.error("Authentication middleware error:", error);
     next(error);
   }
 };
 export const restrictTo =
-  (...userRoles: String[]) =>
-  (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  (...userRoles: string[]) =>
+  (_req: express.Request, res: express.Response, next: express.NextFunction) => {
     const userRole = res.locals.userRole;
-
+    if (!userRole) {
+      return next(
+        new AppError("User role not found in request context.", 400)
+      );
+    }
     // Limit routes to customer
-    if (!userRoles.includes(res.locals.userRole)) {
+    if (!userRoles.includes(userRole)) {
       return next(
         new AppError(
           "Permission denied. Please contact your administrator.",
@@ -230,9 +218,9 @@ export const restrictTo =
   };
 
 export const logoutAccount = (
-  req: express.Request,
+  _req: express.Request,
   res: express.Response,
-  next: express.NextFunction
+  _next: express.NextFunction
 ) => {
   res.send({
     status: "success",
@@ -243,7 +231,7 @@ export const logoutAccount = (
 export const refreshJWTToken = async (
   req: express.Request,
   res: express.Response,
-  next: express.NextFunction
+  _next: express.NextFunction
 ) => {
   try {
     const bearerHeader = req.headers.authorization;
@@ -252,7 +240,9 @@ export const refreshJWTToken = async (
       throw new AppError("Authorization not provided!", 400);
     }
     const bearerToken = bearerHeader.split(" ")[1];
-
+    if (!bearerToken) {
+      throw new AppError("Bearer token not provided!", 400);
+    }
     const returnedObject: any = verifyJWT(bearerToken);
     // returnedObject = JSON.parse(returnedObject as string);
 

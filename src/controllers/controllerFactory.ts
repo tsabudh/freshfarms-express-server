@@ -1,13 +1,13 @@
 import catchAsync from '../utils/catchAsync';
 import AppError from "../utils/appError";
-import mongoose, { Model, Schema, Query, DocumentQuery } from 'mongoose';
+import  { Model, Schema, Query,Document, PopulateOptions } from 'mongoose';
 import { Request, Response, NextFunction } from 'express';
 
 
-export const deleteOne = (Model: Model<Schema>) =>
+export const deleteOne = <T extends Document>(Model: Model<T>) =>
 
   catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const doc = await Model.findByIdAndDelete(req.params.id);
+    const doc = await Model.findByIdAndDelete(req.params['id']);
 
     if (!doc) {
       return next(new AppError(`Could not find ${Model.modelName} with that ID"`, 404));
@@ -21,7 +21,7 @@ export const deleteOne = (Model: Model<Schema>) =>
 
 export const updateOne = (Model: Model<Schema>) =>
   catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const doc = await Model.findByIdAndUpdate(req.params.id, req.body, {
+    const doc = await Model.findByIdAndUpdate(req.params['id'], req.body, {
       new: true,
       runValidators: true,
     });
@@ -40,7 +40,7 @@ export const updateOne = (Model: Model<Schema>) =>
     next();
   });
 
-export const createOne = (Model: Model<Schema>) =>
+export const createOne = <T extends Document>(Model: Model<T>) =>
   catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const doc = await Model.create(req.body);
 
@@ -54,14 +54,11 @@ export const createOne = (Model: Model<Schema>) =>
     next();
   });
 
-// Define a type with an index signature
-type AnyObject = {
-  [key: string]: any;
-};
 
-export const getOne = (Model: Model<Schema>, popOptions: AnyObject) =>
+
+export const getOne = <T extends Document>(Model: Model<T>, popOptions: PopulateOptions) =>
   catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    let query: mongoose.Query<DocumentQuery> = Model.findById(req.params.id);
+    let query: Query<T | null, T>= Model.findById(req.params['id']);
 
     if (popOptions) query = query.populate(popOptions);
     const doc = await query;
@@ -79,8 +76,8 @@ export const getOne = (Model: Model<Schema>, popOptions: AnyObject) =>
     next();
   });
 
-export const getAll = (Model: Model<Schema>) =>
-  catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+export const getAll = <T extends Document>(Model: Model<T>) =>
+  catchAsync(async (_req: Request, res: Response, _next: NextFunction) => {
     const doc = await Model.find();
 
     if (!doc) throw new AppError('Document not found', 400);
@@ -96,20 +93,10 @@ export const getAll = (Model: Model<Schema>) =>
   });
 
 
-export const getMyDetails = (Model: Model<Schema>) => catchAsync(
-
-
-  async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) => {
-
+export const getMyDetails = <T extends Document>(Model: Model<T>) => catchAsync(
+  async (_req: Request, res: Response, _next: NextFunction) => {
     try {
       let userId = res.locals.currentUser;
-      const userRole = res.locals.userRole;
-
-
 
       let myDetails = await Model.findById(userId);
       res.status(200).json({
@@ -120,9 +107,7 @@ export const getMyDetails = (Model: Model<Schema>) => catchAsync(
       res.status(400).json({
         status: 'failure',
         message: error.message
-      })
+      });
     }
-
   }
-
-)
+);

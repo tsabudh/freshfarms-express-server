@@ -7,9 +7,9 @@ import { server } from './webSocket';
 
 dotenv.config({ path: path.join(__dirname + "../../.env") });
 
-const mongoDB: string = (process.env.DATABASE_STRING as string).replace(
+const mongoDB: string = (process.env['DATABASE_STRING'] as string).replace(
   "<password>",
-  process.env.DATABASE_PASSWORD as string
+  process.env['DATABASE_PASSWORD'] as string
 );
 
 // const mongoDB: string = "mongodb://127.0.0.1:27017/shree-krishna";
@@ -21,6 +21,7 @@ async function connectDatabase() {
   try {
     await mongoose.connect(mongoDB);
     console.log("Connected to Database.");
+    server.listen(3000, () => { console.log('Server started on port 3000') });
   } catch (error) {
     console.log("Mongoose Database Error");
     console.log(error);
@@ -29,4 +30,3 @@ async function connectDatabase() {
 
 
 connectDatabase();
-server.listen(3000, () => { console.log('Server started on port 3000') });

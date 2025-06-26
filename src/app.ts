@@ -5,8 +5,6 @@ import express from "express";
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import WebSocket from "ws";
-import http from "http";
 import transactionRouter from "./routes/transactionRoutes";
 import adminRouter from "./routes/adminRoutes";
 import productRouter from "./routes/productRoutes";
@@ -15,8 +13,8 @@ import contractRouter from "./routes/contractRoutes";
 import messageRouter from "./routes/messageRoutes";
 import oAuthRouter from "./routes/oauthRoutes";
 
-import * as authController from "./controllers/authController";
 import AppError from "./utils/appError";
+import { healthChecker } from "./utils/utils";
 
 
 const app = express();
@@ -41,14 +39,16 @@ app.use("/api/v1/contracts", contractRouter);
 app.use("/api/v1/messages", messageRouter);
 app.use("/api/auth/", oAuthRouter);
 
-app.all("*", (req: Request, res: Response, next: NextFunction) => {
+app.get("/api/health-check", healthChecker);
+
+app.all("*", (_req: Request, res: Response, _next: NextFunction) => {
   res.status(400).json({
     status: "failure",
     message: "Missed the route.",
   });
 });
 
-app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
+app.use((error: Error, _req: Request, res: Response, _next: NextFunction) => {
 
   // If the error is an instance of AppError, use its properties
   if (error instanceof AppError) {
@@ -60,7 +60,7 @@ app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
       error: error
     });
   }
-  res.status(400).json({
+  return res.status(400).json({
     status: 'failure',
     message: error.message,
     caughtBy: 'expressGlobalErrorHandler',

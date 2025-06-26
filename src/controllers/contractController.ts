@@ -1,4 +1,3 @@
-import mongoose from 'mongoose';
 import { Request, Response, NextFunction } from 'express';
 
 import { createOne, deleteOne, getAll } from '../controllers/controllerFactory';
@@ -12,10 +11,9 @@ export const createContract = createOne(Contract);
 
 export const deleteContract = deleteOne(Contract);
 
-export const markTodaysDelivery = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const details = req.body;
-    const commencedDate = res.locals.commencedDate;
-    const toUpdate = res.locals.toUpdate;
+export const markTodaysDelivery = catchAsync(async (_req: Request, res: Response, _next: NextFunction) => {
+    const commencedDate = res.locals['commencedDate'];
+    const toUpdate = res.locals['toUpdate'];
 
 
     let results = await Contract.updateMany(
@@ -73,9 +71,9 @@ export const confirmDeliveries = catchAsync(async (req: Request, res: Response, 
 
 
     // Passing information to next middleware
-    res.locals.commencedDate = commencedDate;
-    res.locals.toUpdate = toUpdate;
-    next();
+    res.locals['commencedDate'] = commencedDate;
+    res.locals['toUpdate'] = toUpdate;
+    return next();
     // if (confirmationStatus == true) {
     //     return next();
     // }
