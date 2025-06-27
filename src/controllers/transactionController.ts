@@ -1,13 +1,13 @@
-import mongoose, { PipelineStage } from "mongoose";
-import express from "express";
+import mongoose, { PipelineStage } from 'mongoose';
+import express from 'express';
 
-import Transaction from "../models/Transaction";
-import catchAsync from "../utils/catchAsync";
+import Transaction from '../models/Transaction';
+import catchAsync from '../utils/catchAsync';
 
 export const createTransaction = async (
   req: express.Request,
   res: express.Response,
-  _next: express.NextFunction
+  _next: express.NextFunction,
 ) => {
   try {
     const transactionDetails = req.body;
@@ -15,12 +15,12 @@ export const createTransaction = async (
     const newTransaction = await Transaction.create(transactionDetails);
 
     res.send({
-      status: "success",
+      status: 'success',
       data: newTransaction,
     });
   } catch (error: any) {
     res.send({
-      status: "failure",
+      status: 'failure',
       message: error.message,
     });
   }
@@ -29,7 +29,7 @@ export const createTransaction = async (
 export const getAllTransactions = async (
   req: express.Request,
   res: express.Response,
-  _next: express.NextFunction
+  _next: express.NextFunction,
 ) => {
   try {
     // const limit = req.query['limit'];
@@ -38,57 +38,52 @@ export const getAllTransactions = async (
         $addFields: {
           totalQuantity: {
             $reduce: {
-              input: "$items",
+              input: '$items',
               initialValue: 0,
               in: {
-                $add: ["$$value", "$$this.quantity"],
+                $add: ['$$value', '$$this.quantity'],
               },
             },
           },
           purchaseAmount: {
             $reduce: {
-              input: "$items",
+              input: '$items',
               initialValue: 0,
               in: {
                 // $add: ["$$value", "$$this.priceThen"],
-                $add: [
-                  "$$value",
-                  { $multiply: ["$$this.priceThen", "$$this.quantity"] },
-                ],
+                $add: ['$$value', { $multiply: ['$$this.priceThen', '$$this.quantity'] }],
               },
             },
           },
           itemsVariety: {
-            $size: "$items",
+            $size: '$items',
           },
         },
       },
     ];
 
-    if (res.locals.userRole === "customer") {
+    if (res.locals.userRole === 'customer') {
       aggregationPipeline.push({
         $match: {
-          "customer.customerId": new mongoose.Types.ObjectId(
-            res.locals.currentUser
-          ),
+          'customer.customerId': new mongoose.Types.ObjectId(res.locals.currentUser),
         },
       });
     }
 
     interface filterParams {
       itemsVariety?: {
-        from: String;
-        to: String;
+        from: string;
+        to: string;
       };
 
       totalQuantity?: {
-        from: String;
-        to: String;
+        from: string;
+        to: string;
       };
 
       purchaseAmountRange?: {
-        from: String;
-        to: String;
+        from: string;
+        to: string;
       };
       issuedTime?: {
         from: Date;
@@ -96,8 +91,8 @@ export const getAllTransactions = async (
       };
 
       priceRange?: {
-        from: String;
-        to: String;
+        from: string;
+        to: string;
       };
       productArray?: Array<string>;
       customerArray?: Array<string>;
@@ -113,15 +108,15 @@ export const getAllTransactions = async (
     }
 
     // Pagination and filtering
-    const page = parseInt(req.query["page"] as string) || 1;
-    const limit = parseInt(req.query["limit"] as string) || 10;
+    const page = parseInt(req.query['page'] as string) || 1;
+    const limit = parseInt(req.query['limit'] as string) || 10;
     const skip = (page - 1) * limit;
 
-    if (req.query["filter"]) {
-      let filterParamsX = atob(req.query["filter"] as string);
+    if (req.query['filter']) {
+      let filterParamsX = atob(req.query['filter'] as string);
       let filterParams: filterParams = JSON.parse(filterParamsX);
 
-      filterParams?.itemsVariety &&
+      if (filterParams?.itemsVariety)
         aggregationPipeline.push({
           $match: {
             itemsVariety: {
@@ -131,7 +126,7 @@ export const getAllTransactions = async (
           },
         });
 
-      filterParams.totalQuantity &&
+      if (filterParams.totalQuantity)
         aggregationPipeline.push({
           $match: {
             totalQuantity: {
@@ -141,7 +136,7 @@ export const getAllTransactions = async (
           },
         });
 
-      filterParams.purchaseAmountRange &&
+      if (filterParams.purchaseAmountRange)
         aggregationPipeline.push({
           $match: {
             purchaseAmount: {
@@ -151,7 +146,7 @@ export const getAllTransactions = async (
           },
         });
 
-      filterParams.issuedTime &&
+      if (filterParams.issuedTime)
         aggregationPipeline.push({
           $match: {
             issuedTime: {
@@ -161,7 +156,7 @@ export const getAllTransactions = async (
           },
         });
       //* use all with elemMatch for AND operation of productArray
-      filterParams.productArray &&
+      if (filterParams.productArray)
         aggregationPipeline.push({
           $match: {
             items: {
@@ -170,7 +165,7 @@ export const getAllTransactions = async (
           },
         });
 
-      filterParams.priceRange &&
+      if (filterParams.priceRange)
         aggregationPipeline.push({
           $match: {
             purchaseAmount: {
@@ -181,16 +176,16 @@ export const getAllTransactions = async (
         });
 
       //- Check for customer filters if the user is admin
-      if (res.locals.userRole != "customer") {
-        filterParams.customerArray &&
+      if (res.locals.userRole != 'customer') {
+        if (filterParams.customerArray)
           aggregationPipeline.push({
-            $match: { "customer.name": { $in: filterParams.customerArray } },
+            $match: { 'customer.name': { $in: filterParams.customerArray } },
           });
 
-        filterParams.customerIdArray &&
+        if (filterParams.customerIdArray)
           aggregationPipeline.push({
             $match: {
-              "customer.customerId": {
+              'customer.customerId': {
                 $in: filterParams.customerIdArray,
               },
             },
@@ -198,12 +193,10 @@ export const getAllTransactions = async (
       }
 
       if (filterParams.sortBy) {
-        let sortBy: filterParams["sortBy"] = {};
+        let sortBy: filterParams['sortBy'] = {};
 
-        if (filterParams.sortBy.issuedTime)
-          sortBy.issuedTime = filterParams.sortBy.issuedTime;
-        if (filterParams.sortBy.customer)
-          sortBy.customer = filterParams.sortBy.customer;
+        if (filterParams.sortBy.issuedTime) sortBy.issuedTime = filterParams.sortBy.issuedTime;
+        if (filterParams.sortBy.customer) sortBy.customer = filterParams.sortBy.customer;
         if (filterParams.sortBy.totalQuantity)
           sortBy.totalQuantity = filterParams.sortBy.totalQuantity;
         if (filterParams.sortBy.itemsVariety)
@@ -215,15 +208,15 @@ export const getAllTransactions = async (
           });
         }
       }
-      filterParams.customerId &&
+      if (filterParams.customerId)
         aggregationPipeline.push({
           $match: {
-            "customer.customerId": {
+            'customer.customerId': {
               $eq: new mongoose.Types.ObjectId(filterParams.customerId),
             },
           },
         });
-      filterParams.limit &&
+      if (filterParams.limit)
         aggregationPipeline.push({
           $limit: filterParams.limit,
         });
@@ -231,9 +224,9 @@ export const getAllTransactions = async (
 
     // Count the total number of documents after filtering
     const countPipeline = aggregationPipeline.filter(
-      (stage) => !("$skip" in stage || "$limit" in stage)
+      (stage) => !('$skip' in stage || '$limit' in stage),
     );
-    countPipeline.push({ $count: "totalDocs" });
+    countPipeline.push({ $count: 'totalDocs' });
 
     // Limit and skip for pagination
     aggregationPipeline.push({ $skip: skip });
@@ -249,7 +242,7 @@ export const getAllTransactions = async (
     const totalDocs = countResult[0]?.totalDocs || 0;
 
     res.send({
-      status: "success",
+      status: 'success',
       numberOfResults: results.length,
       currentPage: page,
       totalDocs,
@@ -260,19 +253,15 @@ export const getAllTransactions = async (
     console.log(error);
     console.info(error.message);
     res.send({
-      status: "failure",
+      status: 'failure',
       message: error.message,
     });
   }
 };
 
 export const createManyTransactionsOnContract = catchAsync(
-  async (
-    _req: express.Request,
-    _res: express.Response,
-    _next: express.NextFunction
-  ) => {
+  async (_req: express.Request, _res: express.Response, _next: express.NextFunction) => {
     // const contracts = req.body.contracts;
     return;
-  }
+  },
 );

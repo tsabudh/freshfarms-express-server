@@ -1,8 +1,8 @@
-import https from "http";
-import * as WebSocket from "ws";
+import https from 'http';
+import WebSocket from 'ws';
 
-import Message from "./models/Message";
-import app from "./app";
+import Message from './models/Message';
+import app from './app';
 
 const server = https.createServer(app);
 const websocketServer = new WebSocket.Server({ server });
@@ -13,23 +13,16 @@ interface MessageData {
   recipient: string;
   message: string;
   messageId: string;
+  type: string;
 }
 
-// Define the WebSocket entity map type
-interface WebSocketEntityMap {
-  [key: string]: WebSocket;
-}
+const clients: Record<string, WebSocket> = {};
 
-const clients: WebSocketEntityMap = {};
+websocketServer.on('connection', async (ws) => {
+  ws.on('message', async (message) => {
+    const data = await JSON.parse(message.toString());
 
-websocketServer.on("connection", (ws) => {
-  ws.on("message", async (message) => {
-    const data = JSON.parse(message);
-
-    const clientId = data.sender;
-    const recipientId = data.recipient;
-
-    const newMessage = {
+    const newMessage: MessageData = {
       sender: data.sender,
       type: data.type,
       recipient: data.recipient,
@@ -44,36 +37,44 @@ websocketServer.on("connection", (ws) => {
     };
 
     const forwardMessageToRecipient = function () {
-      if (clients[data.recipient]) {
-        clients[data.recipient].send(JSON.stringify(newMessage));
+      const recipientSocket = clients[data.recipient];
+
+      if (recipientSocket) {
+        recipientSocket.send(JSON.stringify(newMessage));
       }
     };
 
     const sendAcknowledgmentToClient = function () {
       const ackMessage = {
-        type: "ack",
+        type: 'ack',
         sender: data.sender,
         recipient: data.recipient,
         message: data.message,
         messageId: data.messageId,
       };
-      clients[data.sender].send(JSON.stringify(ackMessage));
+      const ackClients = clients[data.sender];
+      if (!ackClients) {
+        console.error(`No client found for sender: ${data.sender}`);
+        return;
+      }
+      ackClients.send(JSON.stringify(ackMessage));
     };
 
     switch (data.type) {
-      case null || "message":
+      case 'message':
+      case null:
         forwardMessageToRecipient();
         // Save the message to MongoDB using Mongoose
         Message.create(newMessage);
         sendAcknowledgmentToClient();
         break;
-      case "register":
+      case 'register':
         registerClient();
         break;
     }
   });
 
-  ws.on("close", () => {
+  ws.on('close', () => {
     // Remove the WebSocket connection from the clients object
     for (const [username, socket] of Object.entries(clients)) {
       if (socket === ws) {
@@ -84,12 +85,12 @@ websocketServer.on("connection", (ws) => {
   });
 });
 
-websocketServer.on("error", (error) => {
-  console.error("WebSocket server error:", error);
+websocketServer.on('error', (error) => {
+  console.error('WebSocket server error:', error);
 });
 
-websocketServer.on("listening", () => {
-  console.log("WebSocket server is listening");
+websocketServer.on('listening', () => {
+  console.log('WebSocket server is listening');
 });
 
 export { server };

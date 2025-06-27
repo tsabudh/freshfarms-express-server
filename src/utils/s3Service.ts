@@ -1,23 +1,15 @@
-import { S3 } from "aws-sdk";
-import dotenv from "dotenv";
-dotenv.config({ path: ".env" });
+import { S3 } from 'aws-sdk';
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env' });
 
-// Set your AWS credentials
-// AWS.config.update({
-//   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-//   secretAccessKey: process.env.ACCESS_SECRET_ACCESS_KEY,
-//   region: process.env.AWS_REGION, // Optional, specify your AWS region
-// });
+import type { Express } from 'express';
 
-import { S3Client } from "@aws-sdk/client-s3";
-import { Upload } from "@aws-sdk/lib-storage";
+import { S3Client } from '@aws-sdk/client-s3';
+import { Upload } from '@aws-sdk/lib-storage';
 
-export const s3uploadV3 = async (
-  file: Express.Multer.File,
-  userRole: string
-) => {
+export const s3uploadV3 = async (file: Express.Multer.File, userRole: string) => {
   const region = process.env['AWS_REGION'];
-  if (!region) throw new Error("AWS_REGION is not defined");
+  if (!region) throw new Error('AWS_REGION is not defined');
   const s3 = new S3Client({ region });
 
   const params = {
@@ -34,7 +26,7 @@ export const s3uploadV3 = async (
   try {
     await parallelUploads3.done();
   } catch (err) {
-    console.error("Error", err);
+    console.error('Error', err);
   }
 };
 
@@ -43,7 +35,7 @@ export const s3uploadV2 = async (file: any) => {
 
   const bucket = process.env['AWS_BUCKET_NAME'];
 
-  if (!bucket) throw new Error("AWS_BUCKET_NAME is not defined");
+  if (!bucket) throw new Error('AWS_BUCKET_NAME is not defined');
 
   const param = {
     Bucket: bucket,
