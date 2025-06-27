@@ -1,20 +1,19 @@
 type CacheOptions = { key?: string; time?: number };
 
-declare module "mongoose" {
-  interface DocumentQuery<
-    T,
-    DocType extends import("mongoose").Document,
-    QueryHelpers = {}
+declare module 'mongoose' {
+  interface Query<
+    ResultType,
+    DocType,
+    // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+    THelpers = {},
+    RawDocType = unknown,
+    QueryOp = 'find',
+    TDocOverrides = Record<string, never>,
   > {
-    mongooseCollection: {
-      name: any;
-    };
-    cache(options?: CacheOptions): any;
+    cache(
+      options?: CacheOptions,
+    ): Query<ResultType, DocType, THelpers, RawDocType, QueryOp, TDocOverrides>;
     useCache: boolean;
     hashKey: string;
   }
-
-  interface Query<ResultType, DocType, THelpers = {}, RawDocType = DocType>
-    extends DocumentQuery<any, any> {}
 }
-export {};

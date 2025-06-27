@@ -1,4 +1,4 @@
-# Freshfarms - Server for freshfarm's digital logkeeping
+# Freshfarms - Server for freshfarm's digital logkeeping.
 
 ## Overview
 
@@ -17,6 +17,7 @@ Freshfarms' digital record-keeping tool is designed to streamline the management
 - **Inventory Management**: Track product inventory efficiently.
 
 ## API Documentation
+
 # Freshfarms API Collection
 
 This repository contains a Postman collection for the Freshfarms API. The collection includes various API endpoints for managing customers, admins, products, and transactions.
@@ -24,6 +25,7 @@ This repository contains a Postman collection for the Freshfarms API. The collec
 ## Collection Overview
 
 ### Customer
+
 - **Get All Customers**: Retrieve all customers.
 - **Add New Customer**: Add a new customer.
 - **Get A Customer**: Retrieve details of a specific customer.
@@ -33,6 +35,7 @@ This repository contains a Postman collection for the Freshfarms API. The collec
 - **Get My Details Customer**: Retrieve details of the currently logged-in customer.
 
 ### Admin
+
 - **Signup Admin**: Register a new admin.
 - **Logout Admin**: Log out the current admin.
 - **Login Admin**: Log in an admin and obtain a JWT token.
@@ -43,6 +46,7 @@ This repository contains a Postman collection for the Freshfarms API. The collec
 - **Verify Token**: Verify the current JWT token.
 
 ### Product
+
 - **Get All Products**: Retrieve all products.
 - **Create Product**: Add a new product.
 - **Update Many Products**: Update multiple products.
@@ -51,10 +55,8 @@ This repository contains a Postman collection for the Freshfarms API. The collec
 - **Add Up Product Quantity**: Increase the quantity of a product.
 
 ### Transaction
+
 - **Create Transaction**: Create a new transaction.
 - **Get all Transaction**: Retriece all transactions. Supports query 'filter' in encrypted filter object format.
 
-
-
 This project is licensed under the [MIT License](LICENSE).
-
