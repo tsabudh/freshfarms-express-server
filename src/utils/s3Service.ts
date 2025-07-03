@@ -1,48 +1,34 @@
-import { S3 } from 'aws-sdk';
-import dotenv from 'dotenv';
-dotenv.config({ path: '.env' });
-
-import type { Express } from 'express';
-
 import { S3Client } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
+import dotenv from 'dotenv';
 
-export const s3uploadV3 = async (file: Express.Multer.File, userRole: string) => {
-  const region = process.env['AWS_REGION'];
-  if (!region) throw new Error('AWS_REGION is not defined');
-  const s3 = new S3Client({ region });
+dotenv.config();
+export const s3 = new S3Client({
+  region: process.env['AWS_REGION'],
+  endpoint: process.env['AWS_ENDPOINT'], // useful for LocalStack
+  credentials: {
+    accessKeyId: process.env['AWS_ACCESS_KEY_ID'] || 'test',
+    secretAccessKey: process.env['AWS_SECRET_ACCESS_KEY'] || 'test',
+  },
+  forcePathStyle: true, // needed for LocalStack
+});
+
+export const s3upload = async (file: Express.Multer.File, userRole: string) => {
+  const bucket = process.env['AWS_BUCKET_NAME'];
+  if (!bucket) throw new Error('AWS_BUCKET_NAME is not defined');
 
   const params = {
-    Bucket: process.env['AWS_BUCKET_NAME'],
+    Bucket: bucket,
     Key: `${userRole}s/profilePicture/${file.originalname}`,
     Body: file.buffer,
   };
 
-  const parallelUploads3 = new Upload({
-    client: s3,
-    params: params,
-  });
-
   try {
-    await parallelUploads3.done();
+    const upload = new Upload({ client: s3, params });
+    await upload.done();
+    console.log(`✅ Uploaded: ${params.Key}`);
   } catch (err) {
-    console.error('Error', err);
+    console.error('❌ Upload error:', err);
+    throw err;
   }
-};
-
-export const s3uploadV2 = async (file: any) => {
-  const s3 = new S3();
-
-  const bucket = process.env['AWS_BUCKET_NAME'];
-
-  if (!bucket) throw new Error('AWS_BUCKET_NAME is not defined');
-
-  const param = {
-    Bucket: bucket,
-    Key: `admins/profilePicture/${file.originalname}`,
-    Body: file.buffer,
-  };
-
-  //* Error: Not assignable to putObjectRequest type
-  return s3.upload(param).promise();
 };

@@ -20,57 +20,67 @@ const clients: Record<string, WebSocket> = {};
 
 websocketServer.on('connection', async (ws) => {
   ws.on('message', async (message) => {
-    const data = await JSON.parse(message.toString());
+    try {
+      const data = await JSON.parse(message.toString());
 
-    const newMessage: MessageData = {
-      sender: data.sender,
-      type: data.type,
-      recipient: data.recipient,
-      message: data.message,
-      messageId: data.messageId,
-    };
-
-    const registerClient = function () {
-      if (!clients[data.sender]) {
-        clients[data.sender] = ws;
-      }
-    };
-
-    const forwardMessageToRecipient = function () {
-      const recipientSocket = clients[data.recipient];
-
-      if (recipientSocket) {
-        recipientSocket.send(JSON.stringify(newMessage));
-      }
-    };
-
-    const sendAcknowledgmentToClient = function () {
-      const ackMessage = {
-        type: 'ack',
+      const newMessage: MessageData = {
         sender: data.sender,
+        type: data.type,
         recipient: data.recipient,
         message: data.message,
         messageId: data.messageId,
       };
-      const ackClients = clients[data.sender];
-      if (!ackClients) {
-        console.error(`No client found for sender: ${data.sender}`);
-        return;
-      }
-      ackClients.send(JSON.stringify(ackMessage));
-    };
 
-    switch (data.type) {
-      case 'message':
-      case null:
-        forwardMessageToRecipient();
-        // Save the message to MongoDB using Mongoose
-        Message.create(newMessage);
-        sendAcknowledgmentToClient();
-        break;
-      case 'register':
-        registerClient();
-        break;
+      const registerClient = function () {
+        if (!clients[data.sender]) {
+          clients[data.sender] = ws;
+        }
+      };
+
+      const forwardMessageToRecipient = function () {
+        const recipientSocket = clients[data.recipient];
+
+        if (recipientSocket) {
+          recipientSocket.send(JSON.stringify(newMessage));
+        }
+      };
+
+      const sendAcknowledgmentToClient = function () {
+        const ackMessage = {
+          type: 'ack',
+          sender: data.sender,
+          recipient: data.recipient,
+          message: data.message,
+          messageId: data.messageId,
+        };
+
+        const ackClients = clients[data.sender];
+
+        if (!ackClients) {
+          console.error(`No client found for sender: ${data.sender}`);
+          return;
+        }
+        ackClients.send(JSON.stringify(ackMessage));
+      };
+
+      switch (data.type) {
+        case 'message':
+        case null:
+          forwardMessageToRecipient();
+          // Save the message to MongoDB using Mongoose
+          Message.create(newMessage);
+          sendAcknowledgmentToClient();
+          break;
+        case 'register':
+          registerClient();
+          break;
+      }
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        console.log(err.message);
+      } else {
+        console.error("Unknown error when ws received 'message'.");
+      }
     }
   });
 

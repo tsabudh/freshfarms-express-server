@@ -1,10 +1,8 @@
-import express from "express";
-import { oAuthCallback, oAuthCheck } from "../middlewares/oauth";
+import express from 'express';
+import { oAuthCallback } from '../middlewares/oauth';
 
 const router = express.Router();
 
-router.route("/callback").get(oAuthCallback);
-
-router.route("/check").get(oAuthCheck);
+router.route('/callback').get(oAuthCallback);
 
 export default router;

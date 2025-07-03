@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { verifyJWT } from '../utils/jwtUtils';
+import { JwtPayload } from 'jsonwebtoken';
 
 export const oAuthCallback = async (req: Request, res: Response) => {
   const { code } = req.query;
@@ -43,22 +44,5 @@ export const oAuthCallback = async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error('Error during token exchange:', error);
     return res.status(500).json({ error: 'Internal server error', details: error.message });
-  }
-};
-
-export const oAuthCheck = (req: Request, res: Response) => {
-  const token = req.cookies['access_token'];
-
-  if (!token) {
-    return res.status(401).json({ message: 'Unauthorized' });
-  }
-
-  try {
-    const user = verifyJWT(token);
-    console.log('User from token:', user);
-    // const user = jwt.verify(token, process.env.JWT_SECRET);
-    return res.json({ user });
-  } catch (e: any) {
-    return res.status(401).json({ message: e.message || 'Invalid or expired token' });
   }
 };

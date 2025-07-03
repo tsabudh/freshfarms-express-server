@@ -19,11 +19,12 @@ export default [
       globals: {
         ...globals.browser,
         ...globals.node,
+        Express: 'readonly',
         console: 'readonly',
       },
 
     },
-   
+
     plugins: {
       '@typescript-eslint': tseslint,
     },

@@ -56,6 +56,6 @@ export function verifyJWT(token: string) {
     return decodedToken;
   } catch (error) {
     console.log(error);
-    return error;
+    throw error;
   }
 }
