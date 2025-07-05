@@ -3,3 +3,6 @@
 .env
 cert*
 src/localData
+dist
+k6-tests
+.clinic
