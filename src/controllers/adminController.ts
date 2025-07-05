@@ -137,7 +137,6 @@ export const getAllAdmins = async (_req: Request, res: Response, _next: NextFunc
 export const streamProfilePicture = async (req: Request, res: Response, _next: NextFunction) => {
   const bucket = process.env['AWS_BUCKET_NAME'];
   const { filename } = req['params'];
-  const currentUser = res.locals['currentUser'];
 
   if (!bucket) return res.status(500).json({ message: 'AWS_BUCKET_NAME is not defined' });
 
