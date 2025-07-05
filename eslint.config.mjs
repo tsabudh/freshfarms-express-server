@@ -19,8 +19,10 @@ export default [
       globals: {
         ...globals.browser,
         ...globals.node,
+        ...globals.jest,
         Express: 'readonly',
         console: 'readonly',
+        jest: true
       },
 
     },
