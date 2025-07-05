@@ -7,6 +7,7 @@ import Admin from '../models/Admin';
 import AppError from '../utils/appError';
 import { signJWT } from '../utils/jwtUtils';
 import Customer from '../models/Customer';
+import { logger } from '../app';
 
 export const validateAdminAccount = async function (
   req: express.Request,
@@ -50,8 +51,8 @@ export const validateCustomerAccount = async function (
       throw new Error('Account not found. Incorrect password or username.');
     }
   } catch (error: any) {
-    console.log(error);
-    res.send({
+    logger.log(error);
+    res.status(400).send({
       status: 'failure',
       message: error.message,
     });
