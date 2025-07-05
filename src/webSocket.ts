@@ -16,7 +16,7 @@ interface MessageData {
   type: string;
 }
 
-const clients: Record<string, WebSocket> = {};
+const clients: Record<string, Set<WebSocket>> = {};
 
 websocketServer.on('connection', async (ws) => {
   ws.on('message', async (message) => {
@@ -33,15 +33,21 @@ websocketServer.on('connection', async (ws) => {
 
       const registerClient = function () {
         if (!clients[data.sender]) {
-          clients[data.sender] = ws;
+          const x = (clients[data.sender] = new Set());
+          x.add(ws);
+        }
+        if (clients[data.sender] && !clients[data.sender]?.has(ws)) {
+          clients[data.sender]?.add(ws);
         }
       };
 
       const forwardMessageToRecipient = function () {
-        const recipientSocket = clients[data.recipient];
+        const recipientSockets = clients[data.recipient];
 
-        if (recipientSocket) {
-          recipientSocket.send(JSON.stringify(newMessage));
+        if (recipientSockets) {
+          recipientSockets.forEach((recipientSocket) => {
+            recipientSocket.send(JSON.stringify(newMessage));
+          });
         }
       };
 
@@ -60,7 +66,7 @@ websocketServer.on('connection', async (ws) => {
           console.error(`No client found for sender: ${data.sender}`);
           return;
         }
-        ackClients.send(JSON.stringify(ackMessage));
+        ackClients.forEach((ackClient) => ackClient.send(JSON.stringify(ackMessage)));
       };
 
       switch (data.type) {
@@ -86,9 +92,12 @@ websocketServer.on('connection', async (ws) => {
 
   ws.on('close', () => {
     // Remove the WebSocket connection from the clients object
-    for (const [username, socket] of Object.entries(clients)) {
-      if (socket === ws) {
-        delete clients[username];
+    for (const [username, socketSet] of Object.entries(clients)) {
+      if (socketSet.has(ws)) {
+        socketSet.delete(ws);
+        if (socketSet.size === 0) {
+          delete clients[username];
+        }
         break;
       }
     }

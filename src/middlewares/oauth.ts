@@ -1,6 +1,4 @@
 import { Request, Response } from 'express';
-import { verifyJWT } from '../utils/jwtUtils';
-import { JwtPayload } from 'jsonwebtoken';
 
 export const oAuthCallback = async (req: Request, res: Response) => {
   const { code } = req.query;
