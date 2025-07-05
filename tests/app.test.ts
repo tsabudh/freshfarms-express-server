@@ -7,9 +7,9 @@ describe('App routes', () => {
       const res = await request(app).get('/api/health-check');
       expect(res.status).toBe(200);
       expect(res.body).toEqual({
-      status: 'success',
-      message: 'Server is running fine.',
-    });
+        status: 'success',
+        message: 'Server is running fine.',
+      });
     });
   });
 });
