@@ -58,14 +58,25 @@ const options = {
 };
 export const logger = createLogger(options);
 
+const allowedOrigins = ['http://localhost:5173', 'https://freshfarmsapp.netlify.app'];
+
 app.use(
   cors({
-    origin: 'http://localhost:5173',
+    origin: function (origin, callback) {
+      // Allow requests with no origin (e.g., mobile apps or curl)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error('CORS not allowed from this origin: ' + origin), false);
+      }
+    },
     credentials: true,
   }),
 );
+
 app.use('*', (_req: Request, _res: Response, next: NextFunction) => {
-  logger.info('Hi there', { route: '/login', status: 200 });
   next();
 });
 
