@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "start": "ts-node-dev --transpile-only ./src/index.ts",
+    "start": "node dist/src/index.js",
     "build": "tsc",
     "dev": "nodemon",
     "test": "jest --config jest.config.js",
